@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"v4l2"
-	"v4l2/ioctl"
+
+	"github.com/jalasoft/go-v4l2"
+	"github.com/jalasoft/go-v4l2/ioctl"
 )
 
 func OpenVideoDevice(path string) (VideoDevice, error) {

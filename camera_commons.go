@@ -2,8 +2,9 @@ package webcam
 
 import (
 	"syscall"
-	"v4l2"
-	"v4l2/ioctl"
+
+	"github.com/jalasoft/go-v4l2"
+	"github.com/jalasoft/go-v4l2/ioctl"
 )
 
 func setFrameSize(fd uintptr, frameSize *DiscreteFrameSize, pixelFormat uint32) error {
