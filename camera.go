@@ -163,8 +163,6 @@ func (s *stream) stream(ticks chan bool, snapshots chan<- Snapshot) {
 		}
 	}()
 
-	defer close(snapshots)
-
 	for range ticks {
 		fmt.Printf("snapshot\n")
 
@@ -176,8 +174,8 @@ func (s *stream) stream(ticks chan bool, snapshots chan<- Snapshot) {
 			log.Fatalf("%v\n", err)
 		}
 
-		ticks <- true
 		snapshots <- snap
+		ticks <- true
 	}
 }
 
