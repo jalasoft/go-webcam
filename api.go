@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"log"
 	"os"
-
 	"github.com/jalasoft/go-v4l2"
 	"github.com/jalasoft/go-v4l2/ioctl"
 )
+
+
 
 func OpenVideoDevice(path string) (VideoDevice, error) {
 	file, err := os.OpenFile(path, os.O_RDWR, 0666)
@@ -29,16 +30,18 @@ func OpenVideoDevice(path string) (VideoDevice, error) {
 	var dev *device = &device{file, v4l2Capability{cap}, supportedFormats{file}, &framesizes{file}, &camera{file}}
 
 	if !dev.Capability().HasCapability(v4l2.V4L2_CAP_VIDEO_CAPTURE) {
-		return nil, errors.New(fmt.Sprintf("Device %s is not a video capturing device.", dev.Name()))
+		return dev, errors.New(fmt.Sprintf("Device %s is not a video capturing device.", dev.Name()))
 	}
 
 	if !dev.Capability().HasCapability(v4l2.V4L2_CAP_STREAMING) {
-		return nil, errors.New(fmt.Sprintf("Device %s is not able to stream frames.", dev.Name()))
+		return dev, errors.New(fmt.Sprintf("Device %s is not able to stream frames.", dev.Name()))
 	}
 
 	log.Printf("Device %s is a video device", file.Name())
 	return dev, nil
 }
+
+
 
 //-------------------------------------------------------------------------
 //MAIN INTERFACE

@@ -164,7 +164,7 @@ func (s *stream) stream(ticks chan bool, snapshots chan<- Snapshot) {
 	}()
 
 	for range ticks {
-		fmt.Printf("snapshot\n")
+		log.Printf("snapshot requested\n")
 
 		snap, err := s.snapshot()
 
