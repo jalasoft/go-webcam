@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"log"
 	"os"
-
-	"github.com/jalasoft/go-v4l2"
-	"github.com/jalasoft/go-v4l2/ioctl"
+	"github.com/jalasoft/go-webcam/v4l2"
 )
+
+
 
 func OpenVideoDevice(path string) (VideoDevice, error) {
 	file, err := os.OpenFile(path, os.O_RDWR, 0666)
@@ -20,7 +20,7 @@ func OpenVideoDevice(path string) (VideoDevice, error) {
 	}
 
 	log.Println("Reading capability")
-	cap, err := ioctl.QueryCapability(file.Fd())
+	cap, err := v4l2.QueryCapability(file.Fd())
 
 	if err != nil {
 		return nil, err
@@ -29,16 +29,18 @@ func OpenVideoDevice(path string) (VideoDevice, error) {
 	var dev *device = &device{file, v4l2Capability{cap}, supportedFormats{file}, &framesizes{file}, &camera{file}}
 
 	if !dev.Capability().HasCapability(v4l2.V4L2_CAP_VIDEO_CAPTURE) {
-		return nil, errors.New(fmt.Sprintf("Device %s is not a video capturing device.", dev.Name()))
+		return dev, errors.New(fmt.Sprintf("Device %s is not a video capturing device.", dev.Name()))
 	}
 
 	if !dev.Capability().HasCapability(v4l2.V4L2_CAP_STREAMING) {
-		return nil, errors.New(fmt.Sprintf("Device %s is not able to stream frames.", dev.Name()))
+		return dev, errors.New(fmt.Sprintf("Device %s is not able to stream frames.", dev.Name()))
 	}
 
 	log.Printf("Device %s is a video device", file.Name())
 	return dev, nil
 }
+
+
 
 //-------------------------------------------------------------------------
 //MAIN INTERFACE

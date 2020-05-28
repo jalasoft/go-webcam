@@ -2,9 +2,7 @@ package webcam
 
 import (
 	"syscall"
-
-	"github.com/jalasoft/go-v4l2"
-	"github.com/jalasoft/go-v4l2/ioctl"
+	"github.com/jalasoft/go-webcam/v4l2"
 )
 
 func setFrameSize(fd uintptr, frameSize *DiscreteFrameSize, pixelFormat uint32) error {
@@ -18,7 +16,7 @@ func setFrameSize(fd uintptr, frameSize *DiscreteFrameSize, pixelFormat uint32) 
 
 	format.SetPixFormat(&pixFormat)
 
-	return ioctl.SetFrameSize(fd, &format)
+	return v4l2.SetFrameSize(fd, &format)
 }
 
 func requestMmapBuffer(fd uintptr) error {
@@ -28,7 +26,7 @@ func requestMmapBuffer(fd uintptr) error {
 	request.Type = v4l2.V4L2_BUF_TYPE_VIDEO_CAPTURE
 	request.Memory = v4l2.V4L2_MEMORY_MMAP
 
-	return ioctl.RequestBuffer(fd, &request)
+	return v4l2.RequestBuffer(fd, &request)
 }
 
 func queryMmapBuffer(fd uintptr) (uint32, uint32, error) {
@@ -38,7 +36,7 @@ func queryMmapBuffer(fd uintptr) (uint32, uint32, error) {
 	buffer.Type = v4l2.V4L2_BUF_TYPE_VIDEO_CAPTURE
 	buffer.Memory = v4l2.V4L2_MEMORY_MMAP
 
-	ioctl.QueryBuffer(fd, buffer)
+	v4l2.QueryBuffer(fd, buffer)
 
 	return buffer.Offset(), buffer.Length, nil
 }
@@ -52,16 +50,16 @@ func munmapBuffer(data []byte) error {
 }
 
 func activateStreaming(fd uintptr) error {
-	return ioctl.ActivateStreaming(fd, v4l2.V4L2_BUF_TYPE_VIDEO_CAPTURE)
+	return v4l2.ActivateStreaming(fd, v4l2.V4L2_BUF_TYPE_VIDEO_CAPTURE)
 }
 
 func deactivateStreaming(fd uintptr) error {
-	return ioctl.DeactivateStreaming(fd, v4l2.V4L2_BUF_TYPE_VIDEO_CAPTURE)
+	return v4l2.DeactivateStreaming(fd, v4l2.V4L2_BUF_TYPE_VIDEO_CAPTURE)
 }
 
 func queueBuffer(fd uintptr, buffer *v4l2.V4l2Buffer) error {
 
-	if err := ioctl.QueueBuffer(fd, buffer); err != nil {
+	if err := v4l2.QueueBuffer(fd, buffer); err != nil {
 		return err
 	}
 
@@ -70,7 +68,7 @@ func queueBuffer(fd uintptr, buffer *v4l2.V4l2Buffer) error {
 
 func dequeueBuffer(fd uintptr, buffer *v4l2.V4l2Buffer) error {
 
-	err := ioctl.DequeueBuffer(fd, buffer)
+	err := v4l2.DequeueBuffer(fd, buffer)
 
 	if err != nil {
 		return err

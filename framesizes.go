@@ -2,9 +2,7 @@ package webcam
 
 import (
 	"os"
-
-	"github.com/jalasoft/go-v4l2"
-	"github.com/jalasoft/go-v4l2/ioctl"
+	"github.com/jalasoft/go-webcam/v4l2"
 )
 
 type framesizes struct {
@@ -80,7 +78,7 @@ func (f *framesizes) iterateFrameSizes(fd uintptr, format uint32, callback frame
 		var str v4l2.V4l2Frmsizeenum
 		str.Index = index
 		str.PixelFormat = format
-		ok, err := ioctl.QueryFrameSize(f.file.Fd(), &str)
+		ok, err := v4l2.QueryFrameSize(f.file.Fd(), &str)
 
 		if err != nil {
 			return err

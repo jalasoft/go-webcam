@@ -4,8 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
-
-	"github.com/jalasoft/go-v4l2"
+	"github.com/jalasoft/go-webcam/v4l2"
 )
 
 //-----------------------------------------------------
@@ -108,7 +107,7 @@ func (s *camera) takeSnapshotAsync(frameSize *DiscreteFrameSize, handler Snapsho
 		return err
 	}
 
-	log.Println("Queueing buffer")
+	log.Println("Queueing buffqueueBufferer")
 	var buffer v4l2.V4l2Buffer
 	buffer.Index = uint32(0)
 	buffer.Type = v4l2.V4L2_BUF_TYPE_VIDEO_CAPTURE
@@ -164,7 +163,7 @@ func (s *stream) stream(ticks chan bool, snapshots chan<- Snapshot) {
 	}()
 
 	for range ticks {
-		fmt.Printf("snapshot\n")
+		log.Printf("snapshot requested\n")
 
 		snap, err := s.snapshot()
 

@@ -3,8 +3,7 @@ package webcam
 import (
 	"os"
 
-	"github.com/jalasoft/go-v4l2"
-	"github.com/jalasoft/go-v4l2/ioctl"
+	"github.com/jalasoft/go-webcam/v4l2"
 )
 
 type supportedFormats struct {
@@ -21,7 +20,7 @@ func (f supportedFormats) Supports(bufType uint32, format uint32) (bool, error) 
 
 	for {
 
-		ok, err := ioctl.QueryFormat(f.file.Fd(), &desc)
+		ok, err := v4l2.QueryFormat(f.file.Fd(), &desc)
 
 		if err != nil {
 			return false, err

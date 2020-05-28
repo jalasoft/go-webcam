@@ -3,7 +3,7 @@ package webcam
 import (
 	"fmt"
 
-	"github.com/jalasoft/go-v4l2"
+	"github.com/jalasoft/go-webcam/v4l2"
 )
 
 type v4l2Capability struct {
