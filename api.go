@@ -5,7 +5,12 @@ import (
 	"fmt"
 	"log"
 	"os"
+<<<<<<< HEAD
 	"github.com/jalasoft/go-webcam/v4l2"
+=======
+	"github.com/jalasoft/go-v4l2"
+	"github.com/jalasoft/go-v4l2/ioctl"
+>>>>>>> b78bdcceb6dab22e037868db6f139084df93f401
 )
 
 
