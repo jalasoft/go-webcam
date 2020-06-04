@@ -29,15 +29,8 @@ func SearchVideoDevices() ([]string, error) {
 		}
 	}
 
-	result := make([]string, len(cameraDevices))
-	log.Printf("******DETECTED CAMERA DEVICES********")
-	for k,v := range cameraDevices {
-		log.Printf("%s: %s", v, k)
-		result = append(result, v)
-	}
-	log.Printf("*************************************")
-
-	return result, nil
+	names := convertToSlice(cameraDevices)
+	return names, nil
 }
 
 func probeDevices(files []string, channel chan VideoDevice) {
@@ -65,10 +58,15 @@ func probeDevice(file string, ch chan VideoDevice, wg *sync.WaitGroup) {
 		return 
 	}
 
-	//cap := device.Capability()
-	//log.Printf("%s, %s, %s.", cap.Driver(), cap.Card(), cap.BusInfo())
-
 	ch <- device
 
 	wg.Done()
+}
+
+func convertToSlice(capToName map[string]string) []string {
+	slice := make([]string, 0, len(capToName))
+	for _, v := range capToName {
+		slice = append(slice, v)
+	}
+	return slice
 }
