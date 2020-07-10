@@ -176,6 +176,8 @@ func (s *stream) stream(ticks chan bool, snapshots chan<- Snapshot) {
 		snapshots <- snap
 		ticks <- true
 	}
+
+	close(snapshots)
 }
 
 func (s *stream) open() error {
