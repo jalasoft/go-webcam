@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+
 	"github.com/jalasoft/go-webcam/v4l2"
 )
 
@@ -174,8 +175,11 @@ func (s *stream) stream(ticks chan bool, snapshots chan<- Snapshot) {
 		}
 
 		snapshots <- snap
-		ticks <- true
 	}
+
+	log.Println("Ticks finished")
+
+	close(snapshots)
 }
 
 func (s *stream) open() error {
