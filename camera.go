@@ -178,7 +178,6 @@ func (s *stream) stream(ticks chan bool, snapshots chan<- Snapshot) {
 	}
 
 	log.Println("Ticks finished")
-
 	close(snapshots)
 }
 
