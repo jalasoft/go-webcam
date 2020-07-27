@@ -171,7 +171,7 @@ func (s *stream) stream(ticks chan bool, snapshots chan<- Snapshot) {
 		if err != nil {
 			close(snapshots)
 			ticks <- false
-			log.Fatalf("%v\n", err)
+			log.Fatalf("chyba %v\n", err)
 		}
 
 		snapshots <- snap

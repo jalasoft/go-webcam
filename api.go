@@ -5,10 +5,9 @@ import (
 	"fmt"
 	"log"
 	"os"
+
 	"github.com/jalasoft/go-webcam/v4l2"
 )
-
-
 
 func OpenVideoDevice(path string) (VideoDevice, error) {
 	file, err := os.OpenFile(path, os.O_RDWR, 0666)
@@ -39,8 +38,6 @@ func OpenVideoDevice(path string) (VideoDevice, error) {
 	log.Printf("Device %s is a video device", file.Name())
 	return dev, nil
 }
-
-
 
 //-------------------------------------------------------------------------
 //MAIN INTERFACE
