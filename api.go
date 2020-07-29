@@ -63,7 +63,10 @@ type Capability interface {
 	BusInfo() string
 	Version() uint32
 	HasCapability(cap uint32) bool
+	AllCapabilityConstants() []CapabilityConstant
 }
+
+type CapabilityConstant string
 
 type SupportedFormats interface {
 	Supports(bufType uint32, format uint32) (bool, error)
