@@ -1,16 +1,16 @@
 package webcam
 
 import (
+	"io"
 	"log"
 	"os"
+
+	"github.com/jalasoft/go-webcam/v4l2"
 )
 
 type device struct {
 	file       *os.File
 	capability v4l2Capability
-	formats    supportedFormats
-	framesizes *framesizes
-	camera     *camera
 }
 
 func (d *device) Name() string {
@@ -22,28 +22,64 @@ func (d *device) Capability() Capability {
 }
 
 func (d *device) Formats() SupportedFormats {
-	return d.formats
+	return d
+}
+
+func (d *device) Supports(bufType uint32, format uint32) (bool, error) {
+
+	var desc v4l2.V4l2Fmtdesc
+	desc.Index = 0
+	desc.Typ = bufType
+
+	var index *uint32 = &desc.Index
+
+	for {
+
+		ok, err := v4l2.QueryFormat(d.file.Fd(), &desc)
+
+		if err != nil {
+			return false, err
+		}
+		if ok {
+			return true, nil
+		}
+
+		if desc.Pixelformat == format {
+			return true, nil
+		}
+
+		*index++
+	}
+	return false, nil
 }
 
 func (d *device) FrameSizes() FrameSizes {
-	return d.framesizes
+	return d
 }
 
 func (d *device) TakeSnapshot(frameSize *DiscreteFrameSize) (Snapshot, error) {
-	return d.camera.takeSnapshot(frameSize)
+	cam := &camera{file: d.file, frameSize: frameSize}
+	return cam.takeSnapshot()
 }
 
 func (d *device) TakeSnapshotAsync(frameSize *DiscreteFrameSize, handler SnapshotHandler) error {
-	return d.camera.takeSnapshotAsync(frameSize, handler)
+	cam := &camera{file: d.file, frameSize: frameSize}
+	return cam.takeSnapshotAsync(handler)
 }
 
 func (d *device) TakeSnapshotChan(frameSize *DiscreteFrameSize, ch chan Snapshot) {
-	d.camera.takeSnapshotChan(frameSize, ch)
+	cam := &camera{file: d.file, frameSize: frameSize}
+	cam.takeSnapshotChan(ch)
 }
 
-func (d *device) Stream(framesize *DiscreteFrameSize, ticks chan bool, snapshots chan<- Snapshot) {
-	stream := &stream{file: d.file, frameSize: framesize}
-	stream.stream(ticks, snapshots)
+func (d *device) StreamByTicks(framesize *DiscreteFrameSize, ticks chan bool, snapshots chan<- Snapshot) {
+	cam := &camera{file: d.file, frameSize: framesize}
+	cam.streamDrivenByTicks(ticks, snapshots)
+}
+
+func (d *device) StreamToWriter(framesize *DiscreteFrameSize, writer io.Writer, stop chan struct{}) {
+	cam := &camera{file: d.file, frameSize: framesize}
+	cam.streamToWriter(writer, stop)
 }
 
 func (d *device) Close() error {

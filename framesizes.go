@@ -1,19 +1,14 @@
 package webcam
 
 import (
-	"os"
 	"github.com/jalasoft/go-webcam/v4l2"
 )
 
-type framesizes struct {
-	file *os.File
-}
-
-func (f *framesizes) SupportsDiscrete(format uint32, width uint32, height uint32) (bool, error) {
+func (d *device) SupportsDiscrete(format uint32, width uint32, height uint32) (bool, error) {
 
 	var result bool = false
 
-	err := f.iterateFrameSizes(f.file.Fd(), format, func(str v4l2.V4l2Frmsizeenum) bool {
+	err := d.iterateFrameSizes(d.file.Fd(), format, func(str v4l2.V4l2Frmsizeenum) bool {
 		if str.Type != v4l2.V4L2_FRMSIZE_TYPE_DISCRETE {
 			return true
 		}
@@ -34,15 +29,15 @@ func (f *framesizes) SupportsDiscrete(format uint32, width uint32, height uint32
 
 	return result, nil
 }
-func (f *framesizes) AllDiscreteMJPEG() ([]DiscreteFrameSize, error) {
-	return f.AllDiscrete(v4l2.V4L2_PIX_FMT_MJPEG)
+func (d *device) AllDiscreteMJPEG() ([]DiscreteFrameSize, error) {
+	return d.AllDiscrete(v4l2.V4L2_PIX_FMT_MJPEG)
 }
 
-func (f *framesizes) AllDiscrete(format uint32) ([]DiscreteFrameSize, error) {
+func (d *device) AllDiscrete(format uint32) ([]DiscreteFrameSize, error) {
 
 	result := make([]DiscreteFrameSize, 0, 10)
 
-	err := f.iterateFrameSizes(f.file.Fd(), format, func(str v4l2.V4l2Frmsizeenum) bool {
+	err := d.iterateFrameSizes(d.file.Fd(), format, func(str v4l2.V4l2Frmsizeenum) bool {
 
 		if str.Type != v4l2.V4L2_FRMSIZE_TYPE_DISCRETE {
 			return true
@@ -70,7 +65,7 @@ type frameSizeCallback func(str v4l2.V4l2Frmsizeenum) bool
 /*
 * local method that accepts consumer who does concrete logic for each frame size
  */
-func (f *framesizes) iterateFrameSizes(fd uintptr, format uint32, callback frameSizeCallback) error {
+func (d *device) iterateFrameSizes(fd uintptr, format uint32, callback frameSizeCallback) error {
 
 	var index uint32 = 0
 	for {
@@ -78,7 +73,7 @@ func (f *framesizes) iterateFrameSizes(fd uintptr, format uint32, callback frame
 		var str v4l2.V4l2Frmsizeenum
 		str.Index = index
 		str.PixelFormat = format
-		ok, err := v4l2.QueryFrameSize(f.file.Fd(), &str)
+		ok, err := v4l2.QueryFrameSize(d.file.Fd(), &str)
 
 		if err != nil {
 			return err
