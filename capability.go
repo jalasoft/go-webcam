@@ -100,15 +100,6 @@ func (c v4l2Capability) AllCapabilities() []Capability {
 	return result
 }
 
-/*
-func (c v4l2Capability) AllCapabilityConstants() []CapabilityConstant {
-	values := make([]CapabilityConstant, len(v4l2.CAP_MAPPING))
-	for k := range v4l2.CAP_MAPPING {
-		values = append(values, CapabilityConstant(k))
-	}
-	return values
-}*/
-
 func (c v4l2Capability) String() string {
 	return fmt.Sprintf("Capability[driver=%s,card=%s,bus=%s,version=%d]", c.Driver(), c.Card(), c.BusInfo(), c.Version())
 }
