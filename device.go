@@ -17,7 +17,7 @@ func (d *device) Name() string {
 	return d.file.Name()
 }
 
-func (d *device) Capability() Capability {
+func (d *device) Capabilities() Capabilities {
 	return d.capability
 }
 

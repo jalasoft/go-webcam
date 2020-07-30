@@ -28,11 +28,11 @@ func OpenVideoDevice(path string) (VideoDevice, error) {
 
 	var dev *device = &device{file, v4l2Capability{cap}}
 
-	if !dev.Capability().HasCapability(v4l2.V4L2_CAP_VIDEO_CAPTURE) {
+	if !dev.Capabilities().HasCapability(CAP_VIDEO_CAPTURE) {
 		return dev, errors.New(fmt.Sprintf("Device %s is not a video capturing device.", dev.Name()))
 	}
 
-	if !dev.Capability().HasCapability(v4l2.V4L2_CAP_STREAMING) {
+	if !dev.Capabilities().HasCapability(CAP_STREAMING) {
 		return dev, errors.New(fmt.Sprintf("Device %s is not able to stream frames.", dev.Name()))
 	}
 
@@ -41,12 +41,16 @@ func OpenVideoDevice(path string) (VideoDevice, error) {
 }
 
 //-------------------------------------------------------------------------
+//V4L2 CONSTANTS
+//-------------------------------------------------------------------------
+
+//-------------------------------------------------------------------------
 //MAIN INTERFACE
 //-------------------------------------------------------------------------
 
 type VideoDevice interface {
 	Name() string
-	Capability() Capability
+	Capabilities() Capabilities
 	Formats() SupportedFormats
 	FrameSizes() FrameSizes
 	TakeSnapshot(frameSize *DiscreteFrameSize) (Snapshot, error)
@@ -57,13 +61,21 @@ type VideoDevice interface {
 	Close() error
 }
 
-type Capability interface {
+type Capabilities interface {
 	Driver() string
 	Card() string
 	BusInfo() string
 	Version() uint32
-	HasCapability(cap uint32) bool
+	HasCapability(cap Capability) bool
+	AllCapabilities() []Capability
 }
+
+type Capability struct {
+	Name  string
+	Value uint32
+}
+
+type CapabilityConstant string
 
 type SupportedFormats interface {
 	Supports(bufType uint32, format uint32) (bool, error)

@@ -1,8 +1,8 @@
 package webcam
 
 import (
-	"log"
 	"fmt"
+	"log"
 	"path/filepath"
 	"sync"
 )
@@ -15,13 +15,13 @@ func SearchVideoDevices() ([]string, error) {
 		return nil, error
 	}
 
-	channel := make(chan VideoDevice)	
+	channel := make(chan VideoDevice)
 	go probeDevices(files, channel)
 
 	cameraDevices := make(map[string]string)
 
 	for cameraDevice := range channel {
-		capStr := fmt.Sprintf("%v", cameraDevice.Capability())
+		capStr := fmt.Sprintf("%v", cameraDevice.Capabilities())
 		cameraDevices[capStr] = cameraDevice.Name()
 
 		if err := cameraDevice.Close(); err != nil {
@@ -46,7 +46,7 @@ func probeDevices(files []string, channel chan VideoDevice) {
 }
 
 func probeDevice(file string, ch chan VideoDevice, wg *sync.WaitGroup) {
-	
+
 	device, error := OpenVideoDevice(file)
 
 	if error != nil {
@@ -55,7 +55,7 @@ func probeDevice(file string, ch chan VideoDevice, wg *sync.WaitGroup) {
 			log.Printf(" and cannot be gracefully closed: %v\n", err)
 		}
 		wg.Done()
-		return 
+		return
 	}
 
 	ch <- device
