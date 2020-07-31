@@ -1,6 +1,8 @@
 package webcam
 
 import (
+	"log"
+
 	"github.com/jalasoft/go-webcam/v4l2"
 )
 
@@ -287,6 +289,16 @@ var AllPixelFormats = []PixelFormat{
 	PIX_FMT_Z16,
 }
 
+func PixelFormatFromString(value string) (PixelFormat, bool) {
+	for _, pixfmt := range AllPixelFormats {
+		if pixfmt.Name == value {
+			return pixfmt, true
+		}
+	}
+	return PixelFormat{}, false
+}
+
+/*
 func (d *device) SupportsDiscrete(format uint32, width uint32, height uint32) (bool, error) {
 
 	var result bool = false
@@ -314,51 +326,64 @@ func (d *device) SupportsDiscrete(format uint32, width uint32, height uint32) (b
 }
 func (d *device) AllDiscreteMJPEG() ([]DiscreteFrameSize, error) {
 	return d.AllDiscrete(v4l2.V4L2_PIX_FMT_MJPEG)
-}
+}*/
 
-func (d *device) AllDiscrete(format uint32) ([]DiscreteFrameSize, error) {
+func (d *device) Discrete(format PixelFormat) ([]DiscreteFrameSize, error) {
 
 	result := make([]DiscreteFrameSize, 0, 10)
 
-	err := d.iterateFrameSizes(d.file.Fd(), format, func(str v4l2.V4l2Frmsizeenum) bool {
-
-		if str.Type != v4l2.V4L2_FRMSIZE_TYPE_DISCRETE {
-			return true
+	err := d.readFrameSizes(d.file.Fd(), format.Value, func(str v4l2.V4l2Frmsizeenum) {
+		if str.Type == v4l2.V4L2_FRMSIZE_TYPE_DISCRETE {
+			disc := str.Discrete()
+			result = append(result, DiscreteFrameSize{disc.Width, disc.Height})
 		}
-
-		discrete := str.Discrete()
-
-		result = append(result, DiscreteFrameSize{discrete.Width, discrete.Height})
-
-		return true
 	})
 
-	if err != nil {
-		return nil, err
-	}
+	return result, err
+}
 
-	return result, nil
+func (d *device) Stepwise(format PixelFormat) ([]StepwiseFrameSize, error) {
+
+	result := make([]StepwiseFrameSize, 0, 10)
+
+	err := d.readFrameSizes(d.file.Fd(), format.Value, func(str v4l2.V4l2Frmsizeenum) {
+		if str.Type == v4l2.V4L2_FRMSIZE_TYPE_STEPWISE {
+			step := str.Stepwise()
+			framesize := StepwiseFrameSize{
+				step.Min_width,
+				step.Max_width,
+				step.Step_width,
+				step.Min_height,
+				step.Max_height,
+				step.Step_height}
+
+			result = append(result, framesize)
+		}
+	})
+
+	return result, err
 }
 
 /*
 * Callback function that accepts filled structure with frame size
  */
-type frameSizeCallback func(str v4l2.V4l2Frmsizeenum) bool
+type frameSizeCallback func(str v4l2.V4l2Frmsizeenum)
 
 /*
 * local method that accepts consumer who does concrete logic for each frame size
  */
-func (d *device) iterateFrameSizes(fd uintptr, format uint32, callback frameSizeCallback) error {
+func (d *device) readFrameSizes(fd uintptr, format uint32, callback frameSizeCallback) error {
 
-	var index uint32 = 0
+	var index uint32
+
 	for {
-
 		var str v4l2.V4l2Frmsizeenum
 		str.Index = index
 		str.PixelFormat = format
-		ok, err := v4l2.QueryFrameSize(d.file.Fd(), &str)
+		ok, err := v4l2.QueryFrameSize(fd, &str)
 
 		if err != nil {
+			log.Printf("An error occured during reading frame size for index %d and format %d: %v\n", index, format, err)
 			return err
 		}
 
@@ -366,10 +391,7 @@ func (d *device) iterateFrameSizes(fd uintptr, format uint32, callback frameSize
 			return nil
 		}
 
-		if !callback(str) {
-			break
-		}
-
+		callback(str)
 		index++
 	}
 }

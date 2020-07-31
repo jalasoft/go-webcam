@@ -345,11 +345,11 @@ func (f V4l2Frmsizeenum) Discrete() V4l2Frmsize_discrete {
 	return *(*V4l2Frmsize_discrete)(unsafe.Pointer(ptr))
 }
 
-func (f V4l2Frmsizeenum) Stepwise() V4l2Frmsize_discrete {
+func (f V4l2Frmsizeenum) Stepwise() V4l2Frmsize_stepwise {
 	ptr := uintptr(unsafe.Pointer(&f))
 	ptr += 24 /*skip index, pixel_format and type*/
 
-	return *(*V4l2Frmsize_discrete)(unsafe.Pointer(ptr))
+	return *(*V4l2Frmsize_stepwise)(unsafe.Pointer(ptr))
 }
 
 type V4l2Frmsize_discrete struct {

@@ -96,14 +96,24 @@ type FrameSizeType uint32
 type PixelFormat NameAndValue
 
 type FrameSizes interface {
-	AllDiscrete(format uint32) ([]DiscreteFrameSize, error)
-	AllDiscreteMJPEG() ([]DiscreteFrameSize, error)
-	SupportsDiscrete(format uint32, width uint32, height uint32) (bool, error)
+	Discrete(format PixelFormat) ([]DiscreteFrameSize, error)
+	Stepwise(format PixelFormat) ([]StepwiseFrameSize, error)
+	//AllDiscreteMJPEG() ([]DiscreteFrameSize, error)
+	//SupportsDiscrete(format uint32, width uint32, height uint32) (bool, error)
 }
 
 type DiscreteFrameSize struct {
 	Width  uint32
 	Height uint32
+}
+
+type StepwiseFrameSize struct {
+	MinWidth   uint32
+	MaxWidth   uint32
+	StepWidth  uint32
+	MinHeight  uint32
+	MaxHeight  uint32
+	StepHeight uint32
 }
 
 func (d DiscreteFrameSize) String() string {
