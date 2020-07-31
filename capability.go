@@ -34,7 +34,7 @@ var CAP_STREAMING Capability = Capability{"V4L2_CAP_STREAMING", v4l2.V4L2_CAP_ST
 var CAP_TOUCH Capability = Capability{"V4L2_CAP_TOUCH", v4l2.V4L2_CAP_TOUCH}
 var CAP_DEVICE_CAPS Capability = Capability{"V4L2_CAP_DEVICE_CAPS", v4l2.V4L2_CAP_DEVICE_CAPS}
 
-var AllCapabilities = []Capability{
+var AllCapabilities = [...]Capability{
 	CAP_VIDEO_CAPTURE,
 	CAP_VIDEO_OUTPUT,
 	CAP_VIDEO_OVERLAY,

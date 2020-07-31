@@ -41,10 +41,6 @@ func OpenVideoDevice(path string) (VideoDevice, error) {
 }
 
 //-------------------------------------------------------------------------
-//V4L2 CONSTANTS
-//-------------------------------------------------------------------------
-
-//-------------------------------------------------------------------------
 //MAIN INTERFACE
 //-------------------------------------------------------------------------
 
@@ -61,6 +57,21 @@ type VideoDevice interface {
 	Close() error
 }
 
+type NameAndValue struct {
+	Name  string
+	Value uint32
+}
+
+//--------------------------------------------------------------------------------------
+//CAPABILITIES
+//--------------------------------------------------------------------------------------
+
+type Capability NameAndValue
+
+func (c Capability) String() string {
+	return fmt.Sprintf("Capability[%s]", c.Name)
+}
+
 type Capabilities interface {
 	Driver() string
 	Card() string
@@ -70,16 +81,19 @@ type Capabilities interface {
 	AllCapabilities() []Capability
 }
 
-type Capability struct {
-	Name  string
-	Value uint32
-}
-
-type CapabilityConstant string
-
+//--------------------------------------------------------------------------------------
+//FORMATS
+//--------------------------------------------------------------------------------------
 type SupportedFormats interface {
 	Supports(bufType uint32, format uint32) (bool, error)
 }
+
+//---------------------------------------------------------------------------------------
+//FRAME SIZES
+//---------------------------------------------------------------------------------------
+
+type FrameSizeType uint32
+type PixelFormat NameAndValue
 
 type FrameSizes interface {
 	AllDiscrete(format uint32) ([]DiscreteFrameSize, error)
@@ -95,6 +109,10 @@ type DiscreteFrameSize struct {
 func (d DiscreteFrameSize) String() string {
 	return fmt.Sprintf("DiscreteFrame[%dx%d]", d.Width, d.Height)
 }
+
+//----------------------------------------------------------------------------------------
+//SNAPSHOT
+//----------------------------------------------------------------------------------------
 
 type Snapshot interface {
 	FrameSize() *DiscreteFrameSize
