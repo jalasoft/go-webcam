@@ -338,34 +338,6 @@ type V4l2Frmsizeenum struct {
 	reserved [2]uint32 /* Reserved space for future use */
 }
 
-func (f V4l2Frmsizeenum) Discrete() V4l2Frmsize_discrete {
-	ptr := uintptr(unsafe.Pointer(&f))
-	ptr += 12 /*skip index, pixel_format and type*/
-
-	return *(*V4l2Frmsize_discrete)(unsafe.Pointer(ptr))
-}
-
-func (f V4l2Frmsizeenum) Stepwise() V4l2Frmsize_stepwise {
-	ptr := uintptr(unsafe.Pointer(&f))
-	ptr += 24 /*skip index, pixel_format and type*/
-
-	return *(*V4l2Frmsize_stepwise)(unsafe.Pointer(ptr))
-}
-
-type V4l2Frmsize_discrete struct {
-	Width  uint32 /* Frame width [pixel] */
-	Height uint32 /* Frame height [pixel] */
-}
-
-type V4l2Frmsize_stepwise struct {
-	Min_width   uint32 /* Minimum frame width [pixel] */
-	Max_width   uint32 /* Maximum frame width [pixel] */
-	Step_width  uint32 /* Frame width step size [pixel] */
-	Min_height  uint32 /* Minimum frame height [pixel] */
-	Max_height  uint32 /* Maximum frame height [pixel] */
-	Step_height uint32 /* Frame height step size [pixel] */
-}
-
 /**
  * struct v4l2_format - stream data format
  * @type:	enum v4l2_buf_type; type of the data stream
@@ -379,7 +351,7 @@ type V4l2Frmsize_stepwise struct {
 type V4l2Format struct {
 	Type uint32
 
-	data [200]byte
+	data [204]byte
 	//union {
 	//	struct v4l2_pix_format		pix;     /* V4L2_BUF_TYPE_VIDEO_CAPTURE */
 	//	struct v4l2_pix_format_mplane	pix_mp;  /* V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE */
@@ -394,12 +366,11 @@ type V4l2Format struct {
 func (f *V4l2Format) SetPixFormat(pixformat *V4l2PixFormat) {
 
 	f.Type = V4L2_BUF_TYPE_VIDEO_CAPTURE
-
 	t := (*V4l2PixFormat)(unsafe.Pointer(&f.data))
 	t.Width = pixformat.Width
 	t.Height = pixformat.Height
 	t.Pixelformat = pixformat.Pixelformat
-	t.Field = pixformat.Field
+	//t.Field = pixformat.Field
 
 	//fff := *(*[204]byte)(unsafe.Pointer(f))
 	//fmt.Printf("%v\n", fff)

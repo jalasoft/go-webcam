@@ -3,7 +3,9 @@ package webcam
 import (
 	"fmt"
 
-	"github.com/jalasoft/go-webcam/v4l2"
+	//"github.com/jalasoft/go-webcam/v4l2"
+	"webcam/v4l2"
+	//"github.com/jalasoft/go-webcam/v4l2"
 )
 
 var CAP_VIDEO_CAPTURE Capability = Capability{"V4L2_CAP_VIDEO_CAPTURE", v4l2.V4L2_CAP_VIDEO_CAPTURE}
@@ -64,31 +66,41 @@ var AllCapabilities = [...]Capability{
 	CAP_DEVICE_CAPS,
 }
 
-type v4l2Capability struct {
+func (d *device) QueryCapabilities() (VideoDeviceCapabilities, error) {
+	cap, err := v4l2.QueryCapability(d.file.Fd())
+
+	if err != nil {
+		return nil, err
+	}
+
+	return videoDeviceCapabilities{cap}, nil
+}
+
+type videoDeviceCapabilities struct {
 	cap v4l2.V4l2Capability
 }
 
-func (c v4l2Capability) Driver() string {
+func (c videoDeviceCapabilities) Driver() string {
 	return string(c.cap.Driver[:])
 }
 
-func (c v4l2Capability) Card() string {
+func (c videoDeviceCapabilities) Card() string {
 	return string(c.cap.Card[:])
 }
 
-func (c v4l2Capability) BusInfo() string {
+func (c videoDeviceCapabilities) BusInfo() string {
 	return string(c.cap.BusInfo[:])
 }
 
-func (c v4l2Capability) Version() uint32 {
+func (c videoDeviceCapabilities) Version() uint32 {
 	return c.cap.Version
 }
 
-func (c v4l2Capability) HasCapability(cap Capability) bool {
+func (c videoDeviceCapabilities) HasCapability(cap Capability) bool {
 	return (c.cap.Capabilities & cap.Value) > 0
 }
 
-func (c v4l2Capability) AllCapabilities() []Capability {
+func (c videoDeviceCapabilities) AllCapabilities() []Capability {
 	var result []Capability
 
 	for _, cap := range AllCapabilities {
@@ -100,6 +112,6 @@ func (c v4l2Capability) AllCapabilities() []Capability {
 	return result
 }
 
-func (c v4l2Capability) String() string {
-	return fmt.Sprintf("Capability[driver=%s,card=%s,bus=%s,version=%d]", c.Driver(), c.Card(), c.BusInfo(), c.Version())
+func (c videoDeviceCapabilities) String() string {
+	return fmt.Sprintf("Details[driver=%s,card=%s,bus=%s,version=%d]", c.Driver(), c.Card(), c.BusInfo(), c.Version())
 }

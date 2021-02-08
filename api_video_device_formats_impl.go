@@ -1,15 +1,70 @@
 package webcam
 
 import (
-	"log"
 
-	"github.com/jalasoft/go-webcam/v4l2"
+	//"github.com/jalasoft/go-webcam/v4l2"
+
+	"webcam/v4l2"
+	//"github.com/jalasoft/go-webcam/v4l2"
+	//"github.com/jalasoft/go-webcam/v4l2"
+	//"github.com/jalasoft/go-webcam/v4l2"
+	//"github.com/jalasoft/go-webcam/v4l2"
 )
 
-var FRMSIZE_TYPE_DISCRETE FrameSizeType = 1
+//"github.com/jalasoft/go-webcam/v4l2"
 
-//FRMSIZE_TYPE_CONTINUOUS FrameSizeType = 2
-var FRMSIZE_TYPE_STEPWISE FrameSizeType = 3
+//--------------------------------------------------------------------------------------------------------------------
+//BUFFER TYPE - IMPLEMENTS BUFFER TYPE INTERFACE
+//--------------------------------------------------------------------------------------------------------------------
+
+type bufferType struct {
+	name  string
+	value uint32
+}
+
+func (b bufferType) Name() string {
+	return b.name
+}
+
+func (b bufferType) Value() uint32 {
+	return b.value
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+//AVAILABLE BUFFER TYPES - NOT USED RIGHT NOW
+//--------------------------------------------------------------------------------------------------------------------
+
+var BUF_TYPE_VIDEO_CAPTURE = bufferType{"V4L2_BUF_TYPE_VIDEO_CAPTURE", v4l2.V4L2_BUF_TYPE_VIDEO_CAPTURE}
+var BUF_TYPE_VIDEO_OUTPUT = bufferType{"V4L2_BUF_TYPE_VIDEO_OUTPUT", v4l2.V4L2_BUF_TYPE_VIDEO_OUTPUT}
+var BUF_TYPE_VIDEO_OVERLAY = bufferType{"V4L2_BUF_TYPE_VIDEO_OVERLAY", v4l2.V4L2_BUF_TYPE_VIDEO_OVERLAY}
+var BUF_TYPE_VBI_CAPTURE = bufferType{"V4L2_BUF_TYPE_VBI_CAPTURE", v4l2.V4L2_BUF_TYPE_VBI_CAPTURE}
+var BUF_TYPE_VBI_OUTPUT = bufferType{"V4L2_BUF_TYPE_VBI_CAPTURE", v4l2.V4L2_BUF_TYPE_VBI_OUTPUT}
+var BUF_TYPE_SLICED_VBI_CAPTURE = bufferType{"V4L2_BUF_TYPE_VBI_CAPTURE", v4l2.V4L2_BUF_TYPE_SLICED_VBI_CAPTURE}
+var BUF_TYPE_SLICED_VBI_OUTPUT = bufferType{"V4L2_BUF_TYPE_VBI_CAPTURE", v4l2.V4L2_BUF_TYPE_SLICED_VBI_OUTPUT}
+var BUF_TYPE_VIDEO_OUTPUT_OVERLAY = bufferType{"V4L2_BUF_TYPE_VBI_CAPTURE", v4l2.V4L2_BUF_TYPE_VIDEO_OUTPUT_OVERLAY}
+var BUF_TYPE_VIDEO_CAPTURE_MPLANE = bufferType{"V4L2_BUF_TYPE_VBI_CAPTURE", v4l2.V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE}
+var BUF_TYPE_VIDEO_OUTPUT_MPLANE = bufferType{"V4L2_BUF_TYPE_VBI_CAPTURE", v4l2.V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE}
+var BUF_TYPE_SDR_CAPTURE = bufferType{"V4L2_BUF_TYPE_VBI_CAPTURE", v4l2.V4L2_BUF_TYPE_SDR_CAPTURE}
+var BUF_TYPE_SDR_OUTPUT = bufferType{"V4L2_BUF_TYPE_VBI_CAPTURE", v4l2.V4L2_BUF_TYPE_SDR_OUTPUT}
+
+var AllBufferTypes = []bufferType{
+	BUF_TYPE_VIDEO_CAPTURE,
+	BUF_TYPE_VIDEO_OUTPUT,
+	BUF_TYPE_VIDEO_OVERLAY,
+	BUF_TYPE_VBI_CAPTURE,
+	BUF_TYPE_VBI_OUTPUT,
+	BUF_TYPE_SLICED_VBI_CAPTURE,
+	BUF_TYPE_SLICED_VBI_OUTPUT,
+	BUF_TYPE_VIDEO_OUTPUT_OVERLAY,
+	BUF_TYPE_VIDEO_CAPTURE_MPLANE,
+	BUF_TYPE_VIDEO_OUTPUT_MPLANE,
+	BUF_TYPE_SDR_CAPTURE,
+	BUF_TYPE_SDR_OUTPUT,
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+//PIXEL FORMAT
+//----------------------------------------------------------------------------------------------------------------------
 
 var PIX_FMT_RGB332 = PixelFormat{"V4L2_PIX_FMT_RGB332", v4l2.V4L2_PIX_FMT_RGB332}
 var PIX_FMT_RGB444 = PixelFormat{"V4L2_PIX_FMT_RGB444", v4l2.V4L2_PIX_FMT_RGB444}
@@ -289,109 +344,223 @@ var AllPixelFormats = []PixelFormat{
 	PIX_FMT_Z16,
 }
 
-func PixelFormatFromString(value string) (PixelFormat, bool) {
-	for _, pixfmt := range AllPixelFormats {
-		if pixfmt.Name == value {
-			return pixfmt, true
+/*
+var formatToString = map[uint32]string{
+
+	v4l2.V4L2_PIX_FMT_RGB332:   "V4L2_PIX_FMT_RGB332",
+	v4l2.V4L2_PIX_FMT_RGB444:   "V4L2_PIX_FMT_RGB444",
+	v4l2.V4L2_PIX_FMT_ARGB444:  "V4L2_PIX_FMT_ARGB444",
+	v4l2.V4L2_PIX_FMT_XRGB444:  "V4L2_PIX_FMT_XRGB444",
+	v4l2.V4L2_PIX_FMT_RGB555:   "V4L2_PIX_FMT_RGB555",
+	v4l2.V4L2_PIX_FMT_ARGB555:  "V4L2_PIX_FMT_ARGB555",
+	v4l2.V4L2_PIX_FMT_XRGB555:  "V4L2_PIX_FMT_XRGB555",
+	v4l2.V4L2_PIX_FMT_RGB565:   "V4L2_PIX_FMT_RGB565",
+	v4l2.V4L2_PIX_FMT_RGB555X:  "V4L2_PIX_FMT_RGB555X",
+	v4l2.V4L2_PIX_FMT_ARGB555X: "V4L2_PIX_FMT_ARGB555X",
+	v4l2.V4L2_PIX_FMT_XRGB555X: "V4L2_PIX_FMT_XRGB555X",
+	v4l2.V4L2_PIX_FMT_RGB565X:  "V4L2_PIX_FMT_RGB565X",
+	v4l2.V4L2_PIX_FMT_BGR666:   "V4L2_PIX_FMT_BGR666",
+	v4l2.V4L2_PIX_FMT_BGR24:    "V4L2_PIX_FMT_BGR24",
+	v4l2.V4L2_PIX_FMT_RGB24:    "V4L2_PIX_FMT_RGB24",
+	v4l2.V4L2_PIX_FMT_BGR32:    "V4L2_PIX_FMT_BGR32",
+	v4l2.V4L2_PIX_FMT_ABGR32:   "V4L2_PIX_FMT_ABGR32",
+	v4l2.V4L2_PIX_FMT_XBGR32:   "V4L2_PIX_FMT_XBGR32",
+	v4l2.V4L2_PIX_FMT_RGB32:    "V4L2_PIX_FMT_RGB32",
+	v4l2.V4L2_PIX_FMT_ARGB32:   "V4L2_PIX_FMT_ARGB32",
+	v4l2.V4L2_PIX_FMT_XRGB32:   "V4L2_PIX_FMT_XRGB32",
+	v4l2.V4L2_PIX_FMT_GREY:   "V4L2_PIX_FMT_GREY",
+	v4l2.V4L2_PIX_FMT_Y4:     "V4L2_PIX_FMT_Y4",
+	v4l2.V4L2_PIX_FMT_Y6:     "V4L2_PIX_FMT_Y6",
+	v4l2.V4L2_PIX_FMT_Y10:    "V4L2_PIX_FMT_Y10",
+	v4l2.V4L2_PIX_FMT_Y12:    "V4L2_PIX_FMT_Y12",
+	v4l2.V4L2_PIX_FMT_Y16:    "V4L2_PIX_FMT_Y16",
+	v4l2.V4L2_PIX_FMT_Y16_BE: "V4L2_PIX_FMT_Y16_BE",
+
+	v4l2.V4L2_PIX_FMT_Y10BPACK: "V4L2_PIX_FMT_Y10BPACK",
+
+	v4l2.V4L2_PIX_FMT_PAL8: "V4L2_PIX_FMT_PAL8",
+
+	v4l2.V4L2_PIX_FMT_UV8: "V4L2_PIX_FMT_UV8",
+
+	v4l2.V4L2_PIX_FMT_YUYV:   "V4L2_PIX_FMT_YUYV",
+	v4l2.V4L2_PIX_FMT_YYUV:   "V4L2_PIX_FMT_YYUV",
+	v4l2.V4L2_PIX_FMT_YVYU:   "V4L2_PIX_FMT_YVYU",
+	v4l2.V4L2_PIX_FMT_UYVY:   "V4L2_PIX_FMT_UYVY",
+	v4l2.V4L2_PIX_FMT_VYUY:   "V4L2_PIX_FMT_VYUY",
+	v4l2.V4L2_PIX_FMT_Y41P:   "V4L2_PIX_FMT_Y41P",
+	v4l2.V4L2_PIX_FMT_YUV444: "V4L2_PIX_FMT_YUV444",
+	v4l2.V4L2_PIX_FMT_YUV555: "V4L2_PIX_FMT_YUV555",
+	v4l2.V4L2_PIX_FMT_YUV565: "V4L2_PIX_FMT_YUV565",
+	v4l2.V4L2_PIX_FMT_YUV32:  "V4L2_PIX_FMT_YUV32",
+	v4l2.V4L2_PIX_FMT_HI240:  "V4L2_PIX_FMT_HI240",
+	v4l2.V4L2_PIX_FMT_HM12:   "V4L2_PIX_FMT_HM12",
+	v4l2.V4L2_PIX_FMT_M420:   "V4L2_PIX_FMT_M420",
+
+	v4l2.V4L2_PIX_FMT_NV12: "V4L2_PIX_FMT_NV12",
+	v4l2.V4L2_PIX_FMT_NV21: "V4L2_PIX_FMT_NV21",
+	v4l2.V4L2_PIX_FMT_NV16: "V4L2_PIX_FMT_NV16",
+	v4l2.V4L2_PIX_FMT_NV61: "V4L2_PIX_FMT_NV61",
+	v4l2.V4L2_PIX_FMT_NV24: "V4L2_PIX_FMT_NV24",
+	v4l2.V4L2_PIX_FMT_NV42: "V4L2_PIX_FMT_NV42",
+
+	v4l2.V4L2_PIX_FMT_NV12M:        "V4L2_PIX_FMT_NV12M",
+	v4l2.V4L2_PIX_FMT_NV21M:        "V4L2_PIX_FMT_NV21M",
+	v4l2.V4L2_PIX_FMT_NV16M:        "V4L2_PIX_FMT_NV16M",
+	v4l2.V4L2_PIX_FMT_NV61M:        "V4L2_PIX_FMT_NV61M",
+	v4l2.V4L2_PIX_FMT_NV12MT:       "V4L2_PIX_FMT_NV12MT",
+	v4l2.V4L2_PIX_FMT_NV12MT_16X16: "V4L2_PIX_FMT_NV12MT_16X16",
+
+	v4l2.V4L2_PIX_FMT_YUV410:  "V4L2_PIX_FMT_YUV410",
+	v4l2.V4L2_PIX_FMT_YVU410:  "V4L2_PIX_FMT_YVU410",
+	v4l2.V4L2_PIX_FMT_YUV411P: "V4L2_PIX_FMT_YUV411P",
+	v4l2.V4L2_PIX_FMT_YUV420:  "V4L2_PIX_FMT_YUV420",
+	v4l2.V4L2_PIX_FMT_YVU420:  "V4L2_PIX_FMT_YVU420",
+	v4l2.V4L2_PIX_FMT_YUV422P: "V4L2_PIX_FMT_YUV422P",
+
+	v4l2.V4L2_PIX_FMT_YUV420M: "V4L2_PIX_FMT_YUV420M",
+	v4l2.V4L2_PIX_FMT_YVU420M: "V4L2_PIX_FMT_YVU420M",
+	v4l2.V4L2_PIX_FMT_YUV422M: "V4L2_PIX_FMT_YUV422M",
+	v4l2.V4L2_PIX_FMT_YVU422M: "V4L2_PIX_FMT_YVU422M",
+	v4l2.V4L2_PIX_FMT_YUV444M: "V4L2_PIX_FMT_YUV444M",
+	v4l2.V4L2_PIX_FMT_YVU444M: "V4L2_PIX_FMT_YVU444M",
+
+	v4l2.V4L2_PIX_FMT_SBGGR8:  "V4L2_PIX_FMT_SBGGR8",
+	v4l2.V4L2_PIX_FMT_SGBRG8:  "V4L2_PIX_FMT_SGBRG8",
+	v4l2.V4L2_PIX_FMT_SGRBG8:  "V4L2_PIX_FMT_SGRBG8",
+	v4l2.V4L2_PIX_FMT_SRGGB8:  "V4L2_PIX_FMT_SRGGB8",
+	v4l2.V4L2_PIX_FMT_SBGGR10: "V4L2_PIX_FMT_SBGGR10",
+	v4l2.V4L2_PIX_FMT_SGBRG10: "V4L2_PIX_FMT_SGBRG10",
+	v4l2.V4L2_PIX_FMT_SGRBG10: "V4L2_PIX_FMT_SGRBG10",
+	v4l2.V4L2_PIX_FMT_SRGGB10: "V4L2_PIX_FMT_SRGGB10",
+	v4l2.V4L2_PIX_FMT_SBGGR10P: "V4L2_PIX_FMT_SBGGR10P",
+	v4l2.V4L2_PIX_FMT_SGBRG10P: "V4L2_PIX_FMT_SGBRG10P",
+	v4l2.V4L2_PIX_FMT_SGRBG10P: "V4L2_PIX_FMT_SGRBG10P",
+	v4l2.V4L2_PIX_FMT_SRGGB10P: "V4L2_PIX_FMT_SRGGB10P",
+
+	v4l2.V4L2_PIX_FMT_SBGGR10ALAW8: "V4L2_PIX_FMT_SBGGR10ALAW8",
+	v4l2.V4L2_PIX_FMT_SGBRG10ALAW8: "V4L2_PIX_FMT_SGBRG10ALAW8",
+	v4l2.V4L2_PIX_FMT_SGRBG10ALAW8: "V4L2_PIX_FMT_SGRBG10ALAW8",
+	v4l2.V4L2_PIX_FMT_SRGGB10ALAW8: "V4L2_PIX_FMT_SRGGB10ALAW8",
+
+	v4l2.V4L2_PIX_FMT_SBGGR10DPCM8: "V4L2_PIX_FMT_SBGGR10DPCM8",
+	v4l2.V4L2_PIX_FMT_SGBRG10DPCM8: "V4L2_PIX_FMT_SGBRG10DPCM8",
+	v4l2.V4L2_PIX_FMT_SGRBG10DPCM8: "V4L2_PIX_FMT_SGRBG10DPCM8",
+	v4l2.V4L2_PIX_FMT_SRGGB10DPCM8: "V4L2_PIX_FMT_SRGGB10DPCM8",
+	v4l2.V4L2_PIX_FMT_SBGGR12:      "V4L2_PIX_FMT_SBGGR12",
+	v4l2.V4L2_PIX_FMT_SGBRG12:      "V4L2_PIX_FMT_SGBRG12",
+	v4l2.V4L2_PIX_FMT_SGRBG12:      "V4L2_PIX_FMT_SGRBG12",
+	v4l2.V4L2_PIX_FMT_SRGGB12:      "V4L2_PIX_FMT_SRGGB12",
+	v4l2.V4L2_PIX_FMT_SBGGR16:      "V4L2_PIX_FMT_SBGGR16",
+
+	v4l2.V4L2_PIX_FMT_MJPEG:       "V4L2_PIX_FMT_MJPEG",
+	v4l2.V4L2_PIX_FMT_JPEG:        "V4L2_PIX_FMT_JPEG",
+	v4l2.V4L2_PIX_FMT_DV:          "V4L2_PIX_FMT_DV",
+	v4l2.V4L2_PIX_FMT_MPEG:        "V4L2_PIX_FMT_MPEG",
+	v4l2.V4L2_PIX_FMT_H264:        "V4L2_PIX_FMT_H264",
+	v4l2.V4L2_PIX_FMT_H264_NO_SC:  "V4L2_PIX_FMT_H264_NO_SC",
+	v4l2.V4L2_PIX_FMT_H264_MVC:    "V4L2_PIX_FMT_H264_MVC",
+	v4l2.V4L2_PIX_FMT_H263:        "V4L2_PIX_FMT_H263",
+	v4l2.V4L2_PIX_FMT_MPEG1:       "V4L2_PIX_FMT_MPEG1",
+	v4l2.V4L2_PIX_FMT_MPEG2:       "V4L2_PIX_FMT_MPEG2",
+	v4l2.V4L2_PIX_FMT_MPEG4:       "V4L2_PIX_FMT_MPEG4",
+	v4l2.V4L2_PIX_FMT_XVID:        "V4L2_PIX_FMT_XVID",
+	v4l2.V4L2_PIX_FMT_VC1_ANNEX_G: "V4L2_PIX_FMT_VC1_ANNEX_G",
+	v4l2.V4L2_PIX_FMT_VC1_ANNEX_L: "V4L2_PIX_FMT_VC1_ANNEX_L",
+	v4l2.V4L2_PIX_FMT_VP8:         "V4L2_PIX_FMT_VP8",
+
+	v4l2.V4L2_PIX_FMT_CPIA1:        "V4L2_PIX_FMT_CPIA1",
+	v4l2.V4L2_PIX_FMT_WNVA:         "V4L2_PIX_FMT_WNVA",
+	v4l2.V4L2_PIX_FMT_SN9C10X:      "V4L2_PIX_FMT_SN9C10X",
+	v4l2.V4L2_PIX_FMT_SN9C20X_I420: "V4L2_PIX_FMT_SN9C20X_I420",
+	v4l2.V4L2_PIX_FMT_PWC1:         "V4L2_PIX_FMT_PWC1",
+	v4l2.V4L2_PIX_FMT_PWC2:         "V4L2_PIX_FMT_PWC2",
+	v4l2.V4L2_PIX_FMT_ET61X251:     "V4L2_PIX_FMT_ET61X251",
+	v4l2.V4L2_PIX_FMT_SPCA501:      "V4L2_PIX_FMT_SPCA501",
+	v4l2.V4L2_PIX_FMT_SPCA505:      "V4L2_PIX_FMT_SPCA505",
+	v4l2.V4L2_PIX_FMT_SPCA508:      "V4L2_PIX_FMT_SPCA508",
+	v4l2.V4L2_PIX_FMT_SPCA561:      "V4L2_PIX_FMT_SPCA561",
+	v4l2.V4L2_PIX_FMT_PAC207:       "V4L2_PIX_FMT_PAC207",
+	v4l2.V4L2_PIX_FMT_MR97310A:     "V4L2_PIX_FMT_MR97310A",
+	v4l2.V4L2_PIX_FMT_JL2005BCD:    "V4L2_PIX_FMT_JL2005BCD",
+	v4l2.V4L2_PIX_FMT_SN9C2028:     "V4L2_PIX_FMT_SN9C2028",
+	v4l2.V4L2_PIX_FMT_SQ905C:       "V4L2_PIX_FMT_SQ905C",
+	v4l2.V4L2_PIX_FMT_PJPG:         "V4L2_PIX_FMT_PJPG",
+	v4l2.V4L2_PIX_FMT_OV511:        "V4L2_PIX_FMT_OV511",
+	v4l2.V4L2_PIX_FMT_OV518:        "V4L2_PIX_FMT_OV518",
+	v4l2.V4L2_PIX_FMT_STV0680:      "V4L2_PIX_FMT_STV0680",
+	v4l2.V4L2_PIX_FMT_TM6000:       "V4L2_PIX_FMT_TM6000",
+	v4l2.V4L2_PIX_FMT_CIT_YYVYUY:   "V4L2_PIX_FMT_CIT_YYVYUY",
+	v4l2.V4L2_PIX_FMT_KONICA420:    "V4L2_PIX_FMT_KONICA420",
+	v4l2.V4L2_PIX_FMT_JPGL:         "V4L2_PIX_FMT_JPGL",
+	v4l2.V4L2_PIX_FMT_SE401:        "V4L2_PIX_FMT_SE401",
+	v4l2.V4L2_PIX_FMT_S5C_UYVY_JPG: "V4L2_PIX_FMT_S5C_UYVY_JPG",
+	v4l2.V4L2_PIX_FMT_Y8I:          "V4L2_PIX_FMT_Y8I",
+	v4l2.V4L2_PIX_FMT_Y12I:         "V4L2_PIX_FMT_Y12I",
+	v4l2.V4L2_PIX_FMT_Z16:          "V4L2_PIX_FMT_Z16",
+}*/
+/*
+type format struct {
+	format     PixelFormat
+	bufferType BufferType
+}
+
+func (f format) Value() PixelFormat {
+	return f.format
+}
+
+func (f format) BufferType() BufferType {
+	return f.bufferType
+}*/
+
+//-------------------------------------------------------------------------------------------------------------------------
+//QUERY FORMATS IMPLEMENTATION
+//-------------------------------------------------------------------------------------------------------------------------
+
+func (d *device) QueryFormats() ([]PixelFormat, error) {
+
+	f, e := queryFormatsForBuffer(d, BUF_TYPE_VIDEO_CAPTURE)
+
+	if e != nil {
+		return nil, e
+	}
+
+	return f, nil
+}
+
+func queryFormatsForBuffer(d *device, buffType bufferType) ([]PixelFormat, error) {
+	var f v4l2.V4l2Fmtdesc
+	f.Index = 0
+	f.Typ = buffType.value
+
+	formats := []PixelFormat{}
+
+	for {
+		ok, err := v4l2.QueryFormat(d.file.Fd(), &f)
+
+		if !ok && err == nil {
+			return formats, nil
+		}
+
+		if !ok && err != nil {
+			return formats, nil
+		}
+
+		pixFormat, found := pixelFormatFromValue(f.Pixelformat)
+
+		if found == false {
+			continue
+		}
+
+		formats = append(formats, pixFormat)
+		f.Index++
+	}
+}
+
+func pixelFormatFromValue(value uint32) (PixelFormat, bool) {
+	for _, f := range AllPixelFormats {
+		if f.Value == value {
+			return f, true
 		}
 	}
 	return PixelFormat{}, false
-}
-
-/*
-func (d *device) SupportsDiscrete(format uint32, width uint32, height uint32) (bool, error) {
-
-	var result bool = false
-
-	err := d.iterateFrameSizes(d.file.Fd(), format, func(str v4l2.V4l2Frmsizeenum) bool {
-		if str.Type != v4l2.V4L2_FRMSIZE_TYPE_DISCRETE {
-			return true
-		}
-
-		discrete := str.Discrete()
-
-		if discrete.Width == width && discrete.Height == height {
-			result = true
-			return false
-		}
-
-		return true
-	})
-
-	if err != nil {
-		return false, err
-	}
-
-	return result, nil
-}
-func (d *device) AllDiscreteMJPEG() ([]DiscreteFrameSize, error) {
-	return d.AllDiscrete(v4l2.V4L2_PIX_FMT_MJPEG)
-}*/
-
-func (d *device) Discrete(format PixelFormat) ([]DiscreteFrameSize, error) {
-
-	result := make([]DiscreteFrameSize, 0, 10)
-
-	err := d.readFrameSizes(d.file.Fd(), format.Value, func(str v4l2.V4l2Frmsizeenum) {
-		if str.Type == v4l2.V4L2_FRMSIZE_TYPE_DISCRETE {
-			disc := str.Discrete()
-			result = append(result, DiscreteFrameSize{disc.Width, disc.Height})
-		}
-	})
-
-	return result, err
-}
-
-func (d *device) Stepwise(format PixelFormat) ([]StepwiseFrameSize, error) {
-
-	result := make([]StepwiseFrameSize, 0, 10)
-
-	err := d.readFrameSizes(d.file.Fd(), format.Value, func(str v4l2.V4l2Frmsizeenum) {
-		if str.Type == v4l2.V4L2_FRMSIZE_TYPE_STEPWISE {
-			step := str.Stepwise()
-			framesize := StepwiseFrameSize{
-				step.Min_width,
-				step.Max_width,
-				step.Step_width,
-				step.Min_height,
-				step.Max_height,
-				step.Step_height}
-
-			result = append(result, framesize)
-		}
-	})
-
-	return result, err
-}
-
-/*
-* Callback function that accepts filled structure with frame size
- */
-type frameSizeCallback func(str v4l2.V4l2Frmsizeenum)
-
-/*
-* local method that accepts consumer who does concrete logic for each frame size
- */
-func (d *device) readFrameSizes(fd uintptr, format uint32, callback frameSizeCallback) error {
-
-	var index uint32
-
-	for {
-		var str v4l2.V4l2Frmsizeenum
-		str.Index = index
-		str.PixelFormat = format
-		ok, err := v4l2.QueryFrameSize(fd, &str)
-
-		if err != nil {
-			log.Printf("An error occured during reading frame size for index %d and format %d: %v\n", index, format, err)
-			return err
-		}
-
-		if !ok {
-			return nil
-		}
-
-		callback(str)
-		index++
-	}
 }

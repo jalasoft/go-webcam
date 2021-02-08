@@ -1,43 +1,16 @@
 package webcam
 
 import (
-	"errors"
 	"fmt"
-	"io"
-	"log"
 	"os"
-
-	"github.com/jalasoft/go-webcam/v4l2"
 )
 
+func SearchVideoDevices() ([]string, error) {
+	return searchVideoDevices()
+}
+
 func OpenVideoDevice(path string) (VideoDevice, error) {
-	file, err := os.OpenFile(path, os.O_RDWR, 0666)
-
-	log.Printf("Opening device %s\n", path)
-
-	if err != nil {
-		return nil, err
-	}
-
-	log.Println("Reading capability")
-	cap, err := v4l2.QueryCapability(file.Fd())
-
-	if err != nil {
-		return nil, err
-	}
-
-	var dev *device = &device{file, v4l2Capability{cap}}
-
-	if !dev.Capabilities().HasCapability(CAP_VIDEO_CAPTURE) {
-		return dev, errors.New(fmt.Sprintf("Device %s is not a video capturing device.", dev.Name()))
-	}
-
-	if !dev.Capabilities().HasCapability(CAP_STREAMING) {
-		return dev, errors.New(fmt.Sprintf("Device %s is not able to stream frames.", dev.Name()))
-	}
-
-	log.Printf("Device %s is a video device", file.Name())
-	return dev, nil
+	return openVideoDevice(path)
 }
 
 //-------------------------------------------------------------------------
@@ -45,15 +18,14 @@ func OpenVideoDevice(path string) (VideoDevice, error) {
 //-------------------------------------------------------------------------
 
 type VideoDevice interface {
-	Name() string
-	Capabilities() Capabilities
-	Formats() SupportedFormats
-	FrameSizes() FrameSizes
-	TakeSnapshot(frameSize *DiscreteFrameSize) (Snapshot, error)
-	TakeSnapshotAsync(frameSize *DiscreteFrameSize, handler SnapshotHandler) error
-	TakeSnapshotChan(frameSize *DiscreteFrameSize, ch chan Snapshot)
-	StreamByTicks(framesize *DiscreteFrameSize, tick chan bool, snapshots chan<- Snapshot)
-	StreamToWriter(framesize *DiscreteFrameSize, writer io.Writer, stop chan struct{})
+	File() *os.File
+	QueryCapabilities() (VideoDeviceCapabilities, error)
+	QueryFormats() ([]PixelFormat, error)
+	QueryFrameSizes(f PixelFormat) (FrameSizes, error)
+	TakeSnapshot(format *PixelFormat, frameSize *DiscreteFrameSize) (Snapshot, error)
+	//TakeSnapshotChan(frameSize *DiscreteFrameSize, ch chan Snapshot)
+	//StreamByTicks(framesize *DiscreteFrameSize, tick chan bool, snapshots chan<- Snapshot)
+	//StreamToWriter(framesize *DiscreteFrameSize, writer io.Writer, stop chan struct{})
 	Close() error
 }
 
@@ -72,7 +44,7 @@ func (c Capability) String() string {
 	return fmt.Sprintf("Capability[%s]", c.Name)
 }
 
-type Capabilities interface {
+type VideoDeviceCapabilities interface {
 	Driver() string
 	Card() string
 	BusInfo() string
@@ -84,22 +56,18 @@ type Capabilities interface {
 //--------------------------------------------------------------------------------------
 //FORMATS
 //--------------------------------------------------------------------------------------
-type SupportedFormats interface {
-	Supports(bufType uint32, format uint32) (bool, error)
-}
+
+type PixelFormat NameAndValue
 
 //---------------------------------------------------------------------------------------
 //FRAME SIZES
 //---------------------------------------------------------------------------------------
 
 type FrameSizeType uint32
-type PixelFormat NameAndValue
 
 type FrameSizes interface {
-	Discrete(format PixelFormat) ([]DiscreteFrameSize, error)
-	Stepwise(format PixelFormat) ([]StepwiseFrameSize, error)
-	//AllDiscreteMJPEG() ([]DiscreteFrameSize, error)
-	//SupportsDiscrete(format uint32, width uint32, height uint32) (bool, error)
+	Discrete() []DiscreteFrameSize
+	Stepwise() []StepwiseFrameSize
 }
 
 type DiscreteFrameSize struct {
@@ -129,5 +97,3 @@ type Snapshot interface {
 	Length() uint32
 	Data() []byte
 }
-
-type SnapshotHandler func(snapshot Snapshot)

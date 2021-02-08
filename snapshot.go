@@ -5,8 +5,10 @@ import (
 	"io"
 	"log"
 	"os"
+	"syscall"
 
-	"github.com/jalasoft/go-webcam/v4l2"
+	//"github.com/jalasoft/go-webcam/v4l2"
+	"webcam/v4l2"
 )
 
 //-----------------------------------------------------
@@ -37,9 +39,49 @@ func (s *snapshot) Length() uint32 {
 
 type camera struct {
 	file      *os.File
+	format    *PixelFormat
 	frameSize *DiscreteFrameSize
 	length    uint32
 	data      []byte
+}
+
+func (s *camera) open() error {
+	log.Printf("Setting up pixel format %s with frame size %dx%d for file %v", s.format.Name, s.frameSize.Width, s.frameSize.Height, s.file.Name())
+	if err := setFrameSize(s.file.Fd(), s.frameSize, s.format.Value); err != nil {
+		return err
+	}
+
+	log.Printf("Frame size set up")
+	log.Printf("Requesting buffer")
+	if err := requestMmapBuffer(s.file.Fd()); err != nil {
+		return err
+	}
+	log.Printf("Buffer requested successfully")
+	log.Printf("Querying mmap buffer")
+	offset, length, err := queryMmapBuffer(s.file.Fd())
+
+	if err != nil {
+		return err
+	}
+
+	s.length = length
+
+	log.Printf("Mmap buffer obtained. Offset=%v, length=%v\n", offset, length)
+	log.Printf("Retrieving mapped memory block, offset=%d, length=%d", offset, length)
+
+	data, err := mapBuffer(s.file.Fd(), offset, length)
+	if err != nil {
+		return err
+	}
+
+	s.data = data
+
+	log.Println("Activating streaming")
+	if err := activateStreaming(s.file.Fd()); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (c *camera) takeSnapshotChan(ch chan Snapshot) {
@@ -61,35 +103,19 @@ func (c *camera) takeSnapshotChan(ch chan Snapshot) {
 
 func (c *camera) takeSnapshot() (Snapshot, error) {
 
-	var sn Snapshot
-
-	err := c.takeSnapshotAsync(func(snap Snapshot) {
-		sn = snap
-	})
-
-	if err != nil {
-		return nil, err
-	}
-
-	return sn, nil
-}
-
-func (c *camera) takeSnapshotAsync(handler SnapshotHandler) error {
-
 	if err := c.open(); err != nil {
-		return err
+		return nil, err
 	}
 
 	defer c.close()
 
 	if err := c.queueDequeue(); err != nil {
-		return err
+		return nil, err
 	}
 
 	snap := &snapshot{c.frameSize, c.data, c.length}
-	handler(snap)
 
-	return nil
+	return snap, nil
 }
 
 func (c *camera) streamToWriter(writer io.Writer, stop chan struct{}) {
@@ -153,45 +179,6 @@ func (c *camera) streamDrivenByTicks(ticks chan bool, snapshots chan<- Snapshot)
 //IMPLEMENTATION DETAILS
 //--------------------------------------------------------------------------------------
 
-func (s *camera) open() error {
-	log.Printf("Setting up frame size %dx%d", s.frameSize.Width, s.frameSize.Height)
-	if err := setFrameSize(s.file.Fd(), s.frameSize, v4l2.V4L2_PIX_FMT_MJPEG); err != nil {
-		return err
-	}
-
-	log.Printf("Frame size set up")
-	log.Printf("Requesting buffer")
-	if err := requestMmapBuffer(s.file.Fd()); err != nil {
-		return err
-	}
-	log.Printf("Buffer requested successfully")
-	log.Printf("Querying mmap buffer")
-	offset, length, err := queryMmapBuffer(s.file.Fd())
-
-	if err != nil {
-		return err
-	}
-
-	s.length = length
-
-	log.Printf("Mmap buffer obtained. Offset=%v, length=%v\n", offset, length)
-	log.Printf("Retrieving mapped memory block, offset=%d, length=%d", offset, length)
-
-	data, err := mapBuffer(s.file.Fd(), offset, length)
-	if err != nil {
-		return err
-	}
-
-	s.data = data
-
-	log.Println("Activating streaming")
-	if err := activateStreaming(s.file.Fd()); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (s *camera) queueDequeue() error {
 
 	log.Println("Queueing buffer")
@@ -224,6 +211,80 @@ func (s *camera) close() error {
 
 	log.Println("Deactivating streaming")
 	if err := deactivateStreaming(s.file.Fd()); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+//-----------------------HELPER FUNCTIONS----------------------------------------------
+
+func setFrameSize(fd uintptr, frameSize *DiscreteFrameSize, pixelFormat uint32) error {
+	var format v4l2.V4l2Format
+
+	var pixFormat v4l2.V4l2PixFormat
+	pixFormat.Width = frameSize.Width
+	pixFormat.Height = frameSize.Height
+	pixFormat.Pixelformat = pixelFormat
+	//pixFormat.Field = v4l2.V4L2_FIELD_NONE
+
+	format.SetPixFormat(&pixFormat)
+
+	return v4l2.SetFrameSize(fd, &format)
+}
+
+func requestMmapBuffer(fd uintptr) error {
+
+	var request v4l2.V4l2RequestBuffers
+	request.Count = 1
+	request.Type = v4l2.V4L2_BUF_TYPE_VIDEO_CAPTURE
+	request.Memory = v4l2.V4L2_MEMORY_MMAP
+
+	return v4l2.RequestBuffer(fd, &request)
+}
+
+func queryMmapBuffer(fd uintptr) (uint32, uint32, error) {
+
+	buffer := &v4l2.V4l2Buffer{}
+	buffer.Index = uint32(0)
+	buffer.Type = v4l2.V4L2_BUF_TYPE_VIDEO_CAPTURE
+	buffer.Memory = v4l2.V4L2_MEMORY_MMAP
+
+	v4l2.QueryBuffer(fd, buffer)
+
+	return buffer.Offset(), buffer.Length, nil
+}
+
+func mapBuffer(fd uintptr, offset uint32, length uint32) ([]byte, error) {
+	return syscall.Mmap(int(fd), int64(offset), int(length), syscall.PROT_READ|syscall.PROT_WRITE, syscall.MAP_SHARED)
+}
+
+func munmapBuffer(data []byte) error {
+	return syscall.Munmap(data)
+}
+
+func activateStreaming(fd uintptr) error {
+	return v4l2.ActivateStreaming(fd, v4l2.V4L2_BUF_TYPE_VIDEO_CAPTURE)
+}
+
+func deactivateStreaming(fd uintptr) error {
+	return v4l2.DeactivateStreaming(fd, v4l2.V4L2_BUF_TYPE_VIDEO_CAPTURE)
+}
+
+func queueBuffer(fd uintptr, buffer *v4l2.V4l2Buffer) error {
+
+	if err := v4l2.QueueBuffer(fd, buffer); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func dequeueBuffer(fd uintptr, buffer *v4l2.V4l2Buffer) error {
+
+	err := v4l2.DequeueBuffer(fd, buffer)
+
+	if err != nil {
 		return err
 	}
 
