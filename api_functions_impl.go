@@ -29,7 +29,6 @@ func openVideoDevice(path string) (VideoDevice, error) {
 		return nil, err
 	}
 
-	//TODO close when not supported
 	if !caps.HasCapability(CAP_VIDEO_CAPTURE) {
 		return nil, errors.New(fmt.Sprintf("Device %s is not a video capturing device.", caps.Card()))
 	}

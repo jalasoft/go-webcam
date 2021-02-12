@@ -21,16 +21,18 @@ func (f frameSizes) Stepwise() []StepwiseFrameSize {
 	return f.stepwise
 }
 
-func (d *device) QueryFrameSizes(f PixelFormat) (FrameSizes, error) {
+//func (d *device) QueryFrameSizes(f PixelFormat) (FrameSizes, error) {
 
-	discrete, stepwise, err := readFrameSizes(d.file.Fd(), f.Value)
+//discrete, stepwise, err := readFrameSizes(d.file.Fd(), f.Value)
 
+/*
 	if err != nil {
 		return nil, err
 	}
 
-	return &frameSizes{discrete, stepwise}, nil
-}
+	return &frameSizes{discrete, stepwise}, nil*/
+//	return nil, nil
+//}
 
 func readFrameSizes(fd uintptr, format uint32) ([]DiscreteFrameSize, []StepwiseFrameSize, error) {
 

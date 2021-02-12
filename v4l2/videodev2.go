@@ -448,7 +448,7 @@ type V4l2Buffer struct {
 	Bytesused uint32
 	Flags     uint32
 	Field     uint32
-	timestamp [8]byte  //struct timeval		timestamp;
+	timestamp [16]byte //struct timeval		timestamp;
 	timecode  [16]byte //struct v4l2_timecode	timecode;
 	Sequence  uint32
 

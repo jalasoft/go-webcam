@@ -1,15 +1,11 @@
 package webcam
 
-import (
+//"github.com/jalasoft/go-webcam/v4l2"
 
-	//"github.com/jalasoft/go-webcam/v4l2"
-
-	"webcam/v4l2"
-	//"github.com/jalasoft/go-webcam/v4l2"
-	//"github.com/jalasoft/go-webcam/v4l2"
-	//"github.com/jalasoft/go-webcam/v4l2"
-	//"github.com/jalasoft/go-webcam/v4l2"
-)
+//"github.com/jalasoft/go-webcam/v4l2"
+//"github.com/jalasoft/go-webcam/v4l2"
+//"github.com/jalasoft/go-webcam/v4l2"
+//"github.com/jalasoft/go-webcam/v4l2"
 
 //"github.com/jalasoft/go-webcam/v4l2"
 
@@ -33,7 +29,7 @@ func (b bufferType) Value() uint32 {
 //--------------------------------------------------------------------------------------------------------------------
 //AVAILABLE BUFFER TYPES - NOT USED RIGHT NOW
 //--------------------------------------------------------------------------------------------------------------------
-
+/*
 var BUF_TYPE_VIDEO_CAPTURE = bufferType{"V4L2_BUF_TYPE_VIDEO_CAPTURE", v4l2.V4L2_BUF_TYPE_VIDEO_CAPTURE}
 var BUF_TYPE_VIDEO_OUTPUT = bufferType{"V4L2_BUF_TYPE_VIDEO_OUTPUT", v4l2.V4L2_BUF_TYPE_VIDEO_OUTPUT}
 var BUF_TYPE_VIDEO_OVERLAY = bufferType{"V4L2_BUF_TYPE_VIDEO_OVERLAY", v4l2.V4L2_BUF_TYPE_VIDEO_OVERLAY}
@@ -343,7 +339,7 @@ var AllPixelFormats = []PixelFormat{
 	PIX_FMT_Y12I,
 	PIX_FMT_Z16,
 }
-
+*/
 /*
 var formatToString = map[uint32]string{
 
@@ -515,7 +511,7 @@ func (f format) BufferType() BufferType {
 //-------------------------------------------------------------------------------------------------------------------------
 //QUERY FORMATS IMPLEMENTATION
 //-------------------------------------------------------------------------------------------------------------------------
-
+/*
 func (d *device) QueryFormats() ([]PixelFormat, error) {
 
 	f, e := queryFormatsForBuffer(d, BUF_TYPE_VIDEO_CAPTURE)
@@ -563,4 +559,4 @@ func pixelFormatFromValue(value uint32) (PixelFormat, bool) {
 		}
 	}
 	return PixelFormat{}, false
-}
+}*/

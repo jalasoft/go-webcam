@@ -45,42 +45,42 @@ type camera struct {
 	data      []byte
 }
 
-func (s *camera) open() error {
-	log.Printf("Setting up pixel format %s with frame size %dx%d for file %v", s.format.Name, s.frameSize.Width, s.frameSize.Height, s.file.Name())
-	if err := setFrameSize(s.file.Fd(), s.frameSize, s.format.Value); err != nil {
-		return err
-	}
+func (s *camera) open() error { /*
+		log.Printf("Setting up pixel format %s with frame size %dx%d for file %v", s.format.Name, s.frameSize.Width, s.frameSize.Height, s.file.Name())
+		if err := setFrameSize(s.file.Fd(), s.frameSize, s.format.Value); err != nil {
+			return err
+		}
 
-	log.Printf("Frame size set up")
-	log.Printf("Requesting buffer")
-	if err := requestMmapBuffer(s.file.Fd()); err != nil {
-		return err
-	}
-	log.Printf("Buffer requested successfully")
-	log.Printf("Querying mmap buffer")
-	offset, length, err := queryMmapBuffer(s.file.Fd())
+		log.Printf("Frame size set up")
+		log.Printf("Requesting buffer")
+		if err := requestMmapBuffer(s.file.Fd()); err != nil {
+			return err
+		}
+		log.Printf("Buffer requested successfully")
+		log.Printf("Querying mmap buffer")
+		offset, length, err := queryMmapBuffer(s.file.Fd())
 
-	if err != nil {
-		return err
-	}
+		if err != nil {
+			return err
+		}
 
-	s.length = length
+		s.length = length
 
-	log.Printf("Mmap buffer obtained. Offset=%v, length=%v\n", offset, length)
-	log.Printf("Retrieving mapped memory block, offset=%d, length=%d", offset, length)
+		log.Printf("Mmap buffer obtained. Offset=%v, length=%v\n", offset, length)
+		log.Printf("Retrieving mapped memory block, offset=%d, length=%d", offset, length)
 
-	data, err := mapBuffer(s.file.Fd(), offset, length)
-	if err != nil {
-		return err
-	}
+		data, err := mapBuffer(s.file.Fd(), offset, length)
+		if err != nil {
+			return err
+		}
 
-	s.data = data
+		s.data = data
 
-	log.Println("Activating streaming")
-	if err := activateStreaming(s.file.Fd()); err != nil {
-		return err
-	}
-
+		log.Println("Activating streaming")
+		if err := activateStreaming(s.file.Fd()); err != nil {
+			return err
+		}
+	*/
 	return nil
 }
 
@@ -162,8 +162,7 @@ func (c *camera) streamDrivenByTicks(ticks chan bool, snapshots chan<- Snapshot)
 		log.Printf("snapshot requested\n")
 
 		if err := c.queueDequeue(); err != nil {
-			close(snapshots)
-			ticks <- false
+			//name := formatToString[formatCode]
 			log.Fatalf("chyba %v\n", err)
 		}
 
@@ -218,7 +217,7 @@ func (s *camera) close() error {
 }
 
 //-----------------------HELPER FUNCTIONS----------------------------------------------
-
+/*
 func setFrameSize(fd uintptr, frameSize *DiscreteFrameSize, pixelFormat uint32) error {
 	var format v4l2.V4l2Format
 
@@ -231,7 +230,7 @@ func setFrameSize(fd uintptr, frameSize *DiscreteFrameSize, pixelFormat uint32) 
 	format.SetPixFormat(&pixFormat)
 
 	return v4l2.SetFrameSize(fd, &format)
-}
+}*/
 
 func requestMmapBuffer(fd uintptr) error {
 

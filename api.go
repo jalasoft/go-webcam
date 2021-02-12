@@ -19,7 +19,7 @@ func OpenVideoDevice(path string) (VideoDevice, error) {
 
 type VideoDevice interface {
 	File() *os.File
-	QueryCapabilities() (VideoDeviceCapabilities, error)
+	QueryCapabilities() (Capabilities, error)
 	QueryFormats() ([]PixelFormat, error)
 	QueryFrameSizes(f PixelFormat) (FrameSizes, error)
 	TakeSnapshot(format *PixelFormat, frameSize *DiscreteFrameSize) (Snapshot, error)
@@ -44,26 +44,28 @@ func (c Capability) String() string {
 	return fmt.Sprintf("Capability[%s]", c.Name)
 }
 
-type VideoDeviceCapabilities interface {
+type Capabilities interface {
 	Driver() string
 	Card() string
 	BusInfo() string
 	Version() uint32
 	HasCapability(cap Capability) bool
-	AllCapabilities() []Capability
+	Capabilities() []Capability
+	AllPossibleCapabilities() []Capability
 }
 
 //--------------------------------------------------------------------------------------
 //FORMATS
 //--------------------------------------------------------------------------------------
 
-type PixelFormat NameAndValue
+type PixelFormat interface {
+	Name() string
+	Description() string
+}
 
 //---------------------------------------------------------------------------------------
 //FRAME SIZES
 //---------------------------------------------------------------------------------------
-
-type FrameSizeType uint32
 
 type FrameSizes interface {
 	Discrete() []DiscreteFrameSize
@@ -75,6 +77,10 @@ type DiscreteFrameSize struct {
 	Height uint32
 }
 
+func (d DiscreteFrameSize) String() string {
+	return fmt.Sprintf("DiscreteFrame[%dx%d]", d.Width, d.Height)
+}
+
 type StepwiseFrameSize struct {
 	MinWidth   uint32
 	MaxWidth   uint32
@@ -84,8 +90,8 @@ type StepwiseFrameSize struct {
 	StepHeight uint32
 }
 
-func (d DiscreteFrameSize) String() string {
-	return fmt.Sprintf("DiscreteFrame[%dx%d]", d.Width, d.Height)
+func (s StepwiseFrameSize) String() string {
+	return fmt.Sprintf("StepwiseFrame[min_w=%d,max_w=%d,min_h=%d,max_height=%d,step_w=%d,step_h=%d]", s.MinWidth, s.MaxWidth, s.MinHeight, s.MaxHeight, s.StepWidth, s.StepHeight)
 }
 
 //----------------------------------------------------------------------------------------

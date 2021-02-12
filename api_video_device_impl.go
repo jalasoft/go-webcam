@@ -14,6 +14,7 @@ func (d *device) File() *os.File {
 	return d.file
 }
 
+/*
 func (d *device) TakeSnapshot(format *PixelFormat, frameSize *DiscreteFrameSize) (Snapshot, error) {
 	cam := &camera{file: d.file, format: format, frameSize: frameSize}
 
@@ -30,7 +31,7 @@ func (d *device) TakeSnapshot(format *PixelFormat, frameSize *DiscreteFrameSize)
 	snap := &snapshot{cam.frameSize, cam.data, cam.length}
 
 	return snap, nil
-}
+}*/
 
 /*
 func (d *device) TakeSnapshotChan(frameSize *DiscreteFrameSize, ch chan Snapshot) {
