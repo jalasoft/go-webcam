@@ -22,7 +22,7 @@ type VideoDevice interface {
 	QueryCapabilities() (Capabilities, error)
 	QueryFormats() ([]PixelFormat, error)
 	QueryFrameSizes(f PixelFormat) (FrameSizes, error)
-	TakeSnapshot(format *PixelFormat, frameSize *DiscreteFrameSize) (Snapshot, error)
+	TakeSnapshot(frameSize *DiscreteFrameSize) (Snapshot, error)
 	//TakeSnapshotChan(frameSize *DiscreteFrameSize, ch chan Snapshot)
 	//StreamByTicks(framesize *DiscreteFrameSize, tick chan bool, snapshots chan<- Snapshot)
 	//StreamToWriter(framesize *DiscreteFrameSize, writer io.Writer, stop chan struct{})
@@ -73,8 +73,9 @@ type FrameSizes interface {
 }
 
 type DiscreteFrameSize struct {
-	Width  uint32
-	Height uint32
+	PixelFormat PixelFormat
+	Width       uint32
+	Height      uint32
 }
 
 func (d DiscreteFrameSize) String() string {
@@ -82,12 +83,13 @@ func (d DiscreteFrameSize) String() string {
 }
 
 type StepwiseFrameSize struct {
-	MinWidth   uint32
-	MaxWidth   uint32
-	StepWidth  uint32
-	MinHeight  uint32
-	MaxHeight  uint32
-	StepHeight uint32
+	PixelFormat PixelFormat
+	MinWidth    uint32
+	MaxWidth    uint32
+	StepWidth   uint32
+	MinHeight   uint32
+	MaxHeight   uint32
+	StepHeight  uint32
 }
 
 func (s StepwiseFrameSize) String() string {
@@ -99,7 +101,5 @@ func (s StepwiseFrameSize) String() string {
 //----------------------------------------------------------------------------------------
 
 type Snapshot interface {
-	FrameSize() *DiscreteFrameSize
-	Length() uint32
 	Data() []byte
 }

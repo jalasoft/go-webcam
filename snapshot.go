@@ -15,6 +15,7 @@ import (
 //SNAPSHOT
 //-----------------------------------------------------
 
+/*
 type snapshot struct {
 	framesize *DiscreteFrameSize
 	data      []byte
@@ -31,7 +32,7 @@ func (s *snapshot) Data() []byte {
 
 func (s *snapshot) Length() uint32 {
 	return s.length
-}
+}*/
 
 //-----------------------------------------------------
 //CAMERA
@@ -84,6 +85,7 @@ func (s *camera) open() error { /*
 	return nil
 }
 
+/*
 func (c *camera) takeSnapshotChan(ch chan Snapshot) {
 
 	if err := c.open(); err != nil {
@@ -99,8 +101,9 @@ func (c *camera) takeSnapshotChan(ch chan Snapshot) {
 	snap := &snapshot{c.frameSize, c.data, c.length}
 	ch <- snap
 	close(ch)
-}
+}*/
 
+/*
 func (c *camera) takeSnapshot() (Snapshot, error) {
 
 	if err := c.open(); err != nil {
@@ -116,7 +119,7 @@ func (c *camera) takeSnapshot() (Snapshot, error) {
 	snap := &snapshot{c.frameSize, c.data, c.length}
 
 	return snap, nil
-}
+}*/
 
 func (c *camera) streamToWriter(writer io.Writer, stop chan struct{}) {
 
@@ -146,6 +149,7 @@ func (c *camera) streamToWriter(writer io.Writer, stop chan struct{}) {
 	log.Printf("Stream skoncil")
 }
 
+/*
 func (c *camera) streamDrivenByTicks(ticks chan bool, snapshots chan<- Snapshot) {
 
 	if err := c.open(); err != nil {
@@ -172,7 +176,7 @@ func (c *camera) streamDrivenByTicks(ticks chan bool, snapshots chan<- Snapshot)
 
 	log.Println("Ticks finished")
 	close(snapshots)
-}
+}*/
 
 //--------------------------------------------------------------------------------------
 //IMPLEMENTATION DETAILS
@@ -232,6 +236,7 @@ func setFrameSize(fd uintptr, frameSize *DiscreteFrameSize, pixelFormat uint32) 
 	return v4l2.SetFrameSize(fd, &format)
 }*/
 
+/*
 func requestMmapBuffer(fd uintptr) error {
 
 	var request v4l2.V4l2RequestBuffers
@@ -240,7 +245,7 @@ func requestMmapBuffer(fd uintptr) error {
 	request.Memory = v4l2.V4L2_MEMORY_MMAP
 
 	return v4l2.RequestBuffer(fd, &request)
-}
+}*/
 
 func queryMmapBuffer(fd uintptr) (uint32, uint32, error) {
 

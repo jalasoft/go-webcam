@@ -111,6 +111,14 @@ struct v4l2_buffer* newBuffer() {
     return buffer;
 }
 
+void queueBuffer(int fd, struct v4l2_buffer* buff) {
+    ioctl(fd, VIDIOC_QBUF, buff);
+}
+
+void dequeueBuffer(int fd, struct v4l2_buffer* buff) {
+    ioctl(fd, VIDIOC_DQBUF, buff);
+}
+
 void streamOn(int fd) {
     __u32 type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     ioctl(fd, VIDIOC_STREAMON, &type);

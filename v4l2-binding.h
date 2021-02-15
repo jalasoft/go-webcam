@@ -24,6 +24,10 @@ void munmap2(void* mem_adr, uint length);
 
 struct v4l2_buffer* newBuffer();
 
+void queueBuffer(int fd, struct v4l2_buffer* buff);
+
+void dequeueBuffer(int fd, struct v4l2_buffer* buff);
+
 void streamOn(int fd);
 
 void streamOff(int fd);
