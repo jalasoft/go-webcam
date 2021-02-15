@@ -3,20 +3,6 @@ package webcam
 //"github.com/jalasoft/go-webcam/v4l2"
 //"webcam/v4l2"
 
-/*
-type frameSizes struct {
-	discrete []DiscreteFrameSize
-	stepwise []StepwiseFrameSize
-}
-
-func (f frameSizes) Discrete() []DiscreteFrameSize {
-	return f.discrete
-}
-
-func (f frameSizes) Stepwise() []StepwiseFrameSize {
-	return f.stepwise
-}
-*/
 //func (d *device) QueryFrameSizes(f PixelFormat) (FrameSizes, error) {
 
 //discrete, stepwise, err := readFrameSizes(d.file.Fd(), f.Value)

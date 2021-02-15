@@ -9,6 +9,27 @@ import (
 	"unsafe"
 )
 
+//---------------------------------------------------------------------------------------------------
+//FRAME SIZES
+//---------------------------------------------------------------------------------------------------
+
+type frameSizes struct {
+	discrete []DiscreteFrameSize
+	stepwise []StepwiseFrameSize
+}
+
+func (f frameSizes) Discrete() []DiscreteFrameSize {
+	return f.discrete
+}
+
+func (f frameSizes) Stepwise() []StepwiseFrameSize {
+	return f.stepwise
+}
+
+//---------------------------------------------------------------------------------------------------
+//QUERY FRAME SIZES
+//---------------------------------------------------------------------------------------------------
+
 func (d *device) QueryFrameSizes(f PixelFormat) (FrameSizes, error) {
 
 	raw := f.(pixelFormat)
