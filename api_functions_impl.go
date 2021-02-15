@@ -7,10 +7,9 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
-	//"github.com/jalasoft/go-webcam/v4l2"
 )
 
-func openVideoDevice(path string) (VideoDevice, error) {
+func openWebcam(path string) (VideoDevice, error) {
 	file, err := os.OpenFile(path, os.O_RDWR, 0666)
 
 	log.Printf("Opening device %s\n", path)
@@ -41,7 +40,7 @@ func openVideoDevice(path string) (VideoDevice, error) {
 	return dev, nil
 }
 
-func searchVideoDevices() ([]string, error) {
+func findWebcams() ([]string, error) {
 
 	files, error := filepath.Glob("/dev/video*")
 
@@ -75,7 +74,7 @@ func probeDevices(files []string, channel chan VideoDevice) {
 
 func probeDevice(file string, ch chan VideoDevice, wg *sync.WaitGroup) {
 
-	device, error := openVideoDevice(file)
+	device, error := openWebcam(file)
 
 	defer wg.Done()
 

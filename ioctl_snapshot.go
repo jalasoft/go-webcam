@@ -5,8 +5,6 @@ import "C"
 import (
 	"encoding/binary"
 	"log"
-
-	//"log"
 	"unsafe"
 )
 

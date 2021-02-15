@@ -5,12 +5,12 @@ import (
 	"os"
 )
 
-func SearchVideoDevices() ([]string, error) {
-	return searchVideoDevices()
+func FindWebcams() ([]string, error) {
+	return findWebcams()
 }
 
-func OpenVideoDevice(path string) (VideoDevice, error) {
-	return openVideoDevice(path)
+func OpenWebcam(path string) (VideoDevice, error) {
+	return openWebcam(path)
 }
 
 //-------------------------------------------------------------------------
