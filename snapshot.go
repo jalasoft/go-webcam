@@ -1,14 +1,10 @@
 package webcam
 
 import (
-	"fmt"
-	"io"
-	"log"
 	"os"
-	"syscall"
-
 	//"github.com/jalasoft/go-webcam/v4l2"
-	"webcam/v4l2"
+	//"github.com/jalasoft/go-webcam/v4l2"
+	//"webcam/v4l2"
 )
 
 //-----------------------------------------------------
@@ -120,7 +116,7 @@ func (c *camera) takeSnapshot() (Snapshot, error) {
 
 	return snap, nil
 }*/
-
+/*
 func (c *camera) streamToWriter(writer io.Writer, stop chan struct{}) {
 
 	if err := c.open(); err != nil {
@@ -148,7 +144,7 @@ func (c *camera) streamToWriter(writer io.Writer, stop chan struct{}) {
 
 	log.Printf("Stream skoncil")
 }
-
+*/
 /*
 func (c *camera) streamDrivenByTicks(ticks chan bool, snapshots chan<- Snapshot) {
 
@@ -181,7 +177,7 @@ func (c *camera) streamDrivenByTicks(ticks chan bool, snapshots chan<- Snapshot)
 //--------------------------------------------------------------------------------------
 //IMPLEMENTATION DETAILS
 //--------------------------------------------------------------------------------------
-
+/*
 func (s *camera) queueDequeue() error {
 
 	log.Println("Queueing buffer")
@@ -246,7 +242,7 @@ func requestMmapBuffer(fd uintptr) error {
 
 	return v4l2.RequestBuffer(fd, &request)
 }*/
-
+/*
 func queryMmapBuffer(fd uintptr) (uint32, uint32, error) {
 
 	buffer := &v4l2.V4l2Buffer{}
@@ -294,3 +290,4 @@ func dequeueBuffer(fd uintptr, buffer *v4l2.V4l2Buffer) error {
 
 	return nil
 }
+*/

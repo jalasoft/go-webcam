@@ -1,13 +1,9 @@
 package webcam
 
-import (
-	"log"
-	"unsafe"
+//"github.com/jalasoft/go-webcam/v4l2"
+//"webcam/v4l2"
 
-	//"github.com/jalasoft/go-webcam/v4l2"
-	"webcam/v4l2"
-)
-
+/*
 type frameSizes struct {
 	discrete []DiscreteFrameSize
 	stepwise []StepwiseFrameSize
@@ -20,7 +16,7 @@ func (f frameSizes) Discrete() []DiscreteFrameSize {
 func (f frameSizes) Stepwise() []StepwiseFrameSize {
 	return f.stepwise
 }
-
+*/
 //func (d *device) QueryFrameSizes(f PixelFormat) (FrameSizes, error) {
 
 //discrete, stepwise, err := readFrameSizes(d.file.Fd(), f.Value)
@@ -33,7 +29,7 @@ func (f frameSizes) Stepwise() []StepwiseFrameSize {
 	return &frameSizes{discrete, stepwise}, nil*/
 //	return nil, nil
 //}
-
+/*
 func readFrameSizes(fd uintptr, format uint32) ([]DiscreteFrameSize, []StepwiseFrameSize, error) {
 
 	var discrete []DiscreteFrameSize
@@ -57,7 +53,7 @@ func readFrameSizes(fd uintptr, format uint32) ([]DiscreteFrameSize, []StepwiseF
 
 		ptr := uintptr(unsafe.Pointer(&str))
 		ptr += 12 /*skip index, pixel_format and type*/
-
+/*
 		if str.Type == v4l2.V4L2_FRMSIZE_TYPE_DISCRETE {
 			d := *(*DiscreteFrameSize)(unsafe.Pointer(ptr))
 			discrete = append(discrete, d)
@@ -71,3 +67,4 @@ func readFrameSizes(fd uintptr, format uint32) ([]DiscreteFrameSize, []StepwiseF
 		str.Index++
 	}
 }
+*/
