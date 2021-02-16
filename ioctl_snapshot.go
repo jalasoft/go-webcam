@@ -130,6 +130,5 @@ func munmap(memPtr uintptr, req_buffer *C.struct_v4l2_buffer) error {
 }
 
 func copyBytes(memPtr uintptr, req_buffer *C.struct_v4l2_buffer) []byte {
-	//length := binary.LittleEndian.Uint32(C.GoBytes(unsafe.Pointer(&req_buffer.length), 4))
 	return C.GoBytes(unsafe.Pointer(memPtr), C.int(req_buffer.length))
 }

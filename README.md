@@ -1,6 +1,6 @@
 # go-webcam
 
-Simple API that allows managing  webcamera on Linux system. It takes advantage of Video For Linux version 2 API (aka v4l2).
+Simple API that allows managing webcameras on Linux system. It takes advantage of Video For Linux version 2 API (aka v4l2).
 
 The API offers following operations:
 
