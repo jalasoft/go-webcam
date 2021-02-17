@@ -5,11 +5,11 @@ import (
 	"os"
 )
 
-func FindWebcams() ([]string, error) {
+func FindWebcams() ([]WebcamInfo, error) {
 	return findWebcams()
 }
 
-func OpenWebcam(path string) (VideoDevice, error) {
+func OpenWebcam(path string) (Webcam, error) {
 	return openWebcam(path)
 }
 
@@ -17,7 +17,16 @@ func OpenWebcam(path string) (VideoDevice, error) {
 //MAIN INTERFACE
 //-------------------------------------------------------------------------
 
-type VideoDevice interface {
+type WebcamInfo struct {
+	File *os.File
+	Name string
+}
+
+func (i WebcamInfo) String() string {
+	return fmt.Sprintf("Webcam[%s:%s]", i.Name, i.File.Name())
+}
+
+type Webcam interface {
 	File() *os.File
 	QueryCapabilities() (Capabilities, error)
 	QueryFormats() ([]PixelFormat, error)

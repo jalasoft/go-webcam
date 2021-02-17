@@ -9,7 +9,7 @@ import (
 	"sync"
 )
 
-func openWebcam(path string) (VideoDevice, error) {
+func openWebcam(path string) (Webcam, error) {
 	file, err := os.OpenFile(path, os.O_RDWR, 0666)
 
 	log.Printf("Opening device %s\n", path)
@@ -40,7 +40,7 @@ func openWebcam(path string) (VideoDevice, error) {
 	return dev, nil
 }
 
-func findWebcams() ([]string, error) {
+func findWebcams() ([]WebcamInfo, error) {
 
 	files, error := filepath.Glob("/dev/video*")
 
@@ -48,19 +48,26 @@ func findWebcams() ([]string, error) {
 		return nil, error
 	}
 
-	channel := make(chan VideoDevice)
+	channel := make(chan Webcam)
 	go probeDevices(files, channel)
 
-	valid := []string{}
+	valid := []WebcamInfo{}
 
 	for device := range channel {
-		valid = append(valid, device.File().Name())
+		cap, _ := device.QueryCapabilities()
+
+		info := WebcamInfo{File: device.File(), Name: cap.Driver()}
+		valid = append(valid, info)
+		
+		if err := device.Close(); err != nil {
+			log.Printf("Could not close webcam %v\n", device)
+		}
 	}
 
 	return valid, nil
 }
 
-func probeDevices(files []string, channel chan VideoDevice) {
+func probeDevices(files []string, channel chan Webcam) {
 	wg := sync.WaitGroup{}
 	wg.Add(len(files))
 
@@ -72,7 +79,7 @@ func probeDevices(files []string, channel chan VideoDevice) {
 	close(channel)
 }
 
-func probeDevice(file string, ch chan VideoDevice, wg *sync.WaitGroup) {
+func probeDevice(file string, ch chan Webcam, wg *sync.WaitGroup) {
 
 	device, error := openWebcam(file)
 
@@ -82,12 +89,6 @@ func probeDevice(file string, ch chan VideoDevice, wg *sync.WaitGroup) {
 		log.Printf("Device %s is not a camera\n", file)
 		return
 	}
-
-	defer func() {
-		if err := device.Close(); err != nil {
-			log.Printf("Cannot close device '%s'", device.File().Name())
-		}
-	}()
 
 	ch <- device
 }
