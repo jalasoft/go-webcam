@@ -201,7 +201,7 @@ func (d *device) QueryFormats() ([]PixelFormat, error) {
 
 	formatCode := binary.LittleEndian.Uint32(C.GoBytes(unsafe.Pointer(&desc.pixelformat), 4))
 	name := formatToString[formatCode]
-	description := string(C.GoBytes(unsafe.Pointer(&desc.description), 32))
+	description := readString((uintptr)(unsafe.Pointer(&desc.description)), 32)
 
 	result = append(result, pixelFormat{name: name, desc: description, value: formatCode})
 
@@ -218,7 +218,7 @@ func (d *device) QueryFormats() ([]PixelFormat, error) {
 
 		formatCode = binary.LittleEndian.Uint32(C.GoBytes(unsafe.Pointer(&desc.pixelformat), 4))
 		name = formatToString[formatCode]
-		description = string(C.GoBytes(unsafe.Pointer(&desc.description), 32))
+		description = readString((uintptr)(unsafe.Pointer(&desc.description)), 32)
 
 		result = append(result, pixelFormat{name: name, desc: description, value: formatCode})
 	}

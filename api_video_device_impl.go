@@ -17,3 +17,5 @@ func (d *device) Close() error {
 	log.Printf("Closing video device.\n")
 	return d.file.Close()
 }
+
+

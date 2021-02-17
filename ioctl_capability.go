@@ -139,9 +139,9 @@ func (d *device) QueryCapabilities() (Capabilities, error) {
 
 	result := capability{}
 
-	result.driver = string(C.GoBytes(unsafe.Pointer(&cap.driver), 16))
-	result.card = string(C.GoBytes(unsafe.Pointer(&cap.card), 32))
-	result.businfo = string(C.GoBytes(unsafe.Pointer(&cap.bus_info), 32))
+	result.driver = readString((uintptr)(unsafe.Pointer(&cap.driver)), 16)
+	result.card = readString((uintptr) (unsafe.Pointer(&cap.card)), 32)
+	result.businfo = readString((uintptr) (unsafe.Pointer(&cap.bus_info)), 32)
 	result.version = binary.LittleEndian.Uint32(C.GoBytes(unsafe.Pointer(&cap.version), 4))
 	result.cap_mask = binary.LittleEndian.Uint32(C.GoBytes(unsafe.Pointer(&cap.capabilities), 4))
 	result.cap_values = convertCapabilities(result.cap_mask)
