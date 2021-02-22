@@ -9,15 +9,67 @@ The API offers following operations:
 * Querying supported formats of pictures
 * Querying supported frame sizes of picures
 * Taking a snapshot for given frame size
+* Streaming series of snapshots 
 
 ### Installing module
 
 ```bash
-mkdir my-module
-cd my-module
-go mod init my-module
-go get github.com/jalasoft/go-webcam
+go get -u github.com/jalasoft/go-webcam
 ```
+
+### API description
+
+1. The first step is to obtain an instance of webcam.Webcam and to defer closing it:
+   ```go
+    webcam, err := webcam.OpenWebcam("/dev/video0")
+	
+	if err != nil {
+	    //handle
+	}
+
+	defer func() {
+		if err := webcam.Close(); err != nil {
+			//handle
+		} 
+	}()
+   ```
+
+2. Usual usage of this API is to either take a snapshot or to stream snapshots. Both cases requires an instance of webcam.DiscreteFrameSize. To have one, there are two ways:
+   * call __webcam.Webcam.QueryFormats()__ and then based on selected *webcam.PixelFormat* invoke __webcam.Webcam.QueryFrameSizes()__
+   ```go
+       //cam is an instance of webcam.Webcam
+       formats, err := cam.QueryFormats()
+
+       if err != nil {
+          //handle
+       }
+
+	   //select desired pixel format, the most usuall and 
+	   //wide spread is V4L2_PIX_FMT_MJPEG
+       fs, err := cam.QueryFrameSizes(formats[0])
+
+        if err != nil {
+            //handle
+        }
+
+        for _, d := range fs.Discrete() {
+			//iterate over all supported discrete frame sizes
+			//and select the desired one
+        }
+   ```
+   * use "automatic mode" that tries to select pixel format, width and height automatically, still allowing to set some of the paramters.
+	```go
+	//cam is an instance of webcam.Webcam
+	frmSize, err := cam.DiscreteFrameSize()
+		.PixelFormatName("V4L2_PIX_FMT_MJPEG")
+		.PixelFormat(<existing instance webcam.PixelFormat>)
+		.Width(640)
+		.Height(480)
+		.Select()
+	```
+	You can omit any (or both) of methods __Width()__, __Height()__, use either __PixelFormatName()__ or __PixelFormat()__, or none of them and the most appriproate pixel format will be choosen automatically. 
+
+
 
 ### Example of probing all available video devices
 

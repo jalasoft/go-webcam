@@ -31,6 +31,7 @@ type Webcam interface {
 	QueryCapabilities() (Capabilities, error)
 	QueryFormats() ([]PixelFormat, error)
 	QueryFrameSizes(f PixelFormat) (FrameSizes, error)
+	DiscreteFrameSize() DiscreteFrameSizeSelector
 	TakeSnapshot(frameSize *DiscreteFrameSize) (Snapshot, error)
 	StreamSnapshots(framesize *DiscreteFrameSize, snapChan chan Snapshot, errChan chan error, stop chan bool)
 	Close() error
@@ -101,6 +102,18 @@ type StepwiseFrameSize struct {
 
 func (s StepwiseFrameSize) String() string {
 	return fmt.Sprintf("StepwiseFrame[min_w=%d,max_w=%d,min_h=%d,max_height=%d,step_w=%d,step_h=%d]", s.MinWidth, s.MaxWidth, s.MinHeight, s.MaxHeight, s.StepWidth, s.StepHeight)
+}
+
+//----------------------------------------------------------------------------------------
+//FRAME SIZE SELECTOR
+//----------------------------------------------------------------------------------------
+
+type DiscreteFrameSizeSelector interface {
+	PixelFormat(pixFmt PixelFormat) DiscreteFrameSizeSelector
+	PixelFormatName(pixFmt string) DiscreteFrameSizeSelector
+	Width(w uint32) DiscreteFrameSizeSelector
+	Height(h uint32) DiscreteFrameSizeSelector
+	Select() (DiscreteFrameSize, error)
 }
 
 //----------------------------------------------------------------------------------------
