@@ -32,9 +32,7 @@ type Webcam interface {
 	QueryFormats() ([]PixelFormat, error)
 	QueryFrameSizes(f PixelFormat) (FrameSizes, error)
 	TakeSnapshot(frameSize *DiscreteFrameSize) (Snapshot, error)
-	//TakeSnapshotChan(frameSize *DiscreteFrameSize, ch chan Snapshot)
-	//StreamByTicks(framesize *DiscreteFrameSize, tick chan bool, snapshots chan<- Snapshot)
-	//StreamToWriter(framesize *DiscreteFrameSize, writer io.Writer, stop chan struct{})
+	StreamSnapshots(framesize *DiscreteFrameSize, snapChan chan Snapshot, errChan chan error, stop chan bool)
 	Close() error
 }
 

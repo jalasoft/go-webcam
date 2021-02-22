@@ -101,6 +101,105 @@ func (d *device) TakeSnapshot(frameSize *DiscreteFrameSize) (Snapshot, error) {
 	return &snapshot{bytes}, nil
 }
 
+func (d *device) StreamSnapshots(framesize *DiscreteFrameSize, snapChan chan Snapshot, errChan chan error, stop chan bool) {
+
+	defer close(snapChan)
+	defer close(errChan)
+
+	err := setFrameSize(d, framesize)
+
+	if err != nil {
+		errChan <- err
+		return
+	}
+
+	_, err = C.requestBuffer(C.int(d.file.Fd()))
+
+	if err != nil {
+		errChan <- err
+		return
+	}
+
+	var requestedBuffer *C.struct_v4l2_buffer
+
+	requestedBuffer, err = C.queryBuffer(C.int(d.file.Fd()))
+
+	if err != nil {
+		errChan <- err
+		return
+	}
+
+	defer C.free(unsafe.Pointer(requestedBuffer))
+
+	mappedMemoryPtr, err := mmap(d, requestedBuffer)
+
+	if err != nil {
+		errChan <- err
+		return
+	}
+
+	defer func() {
+		err = munmap(mappedMemoryPtr, requestedBuffer)
+
+		if err != nil {
+			log.Printf("Cannot munmap memory region: %v\n", err)
+		}
+	}()
+
+	var buffer *C.struct_v4l2_buffer
+
+	buffer, err = C.newBuffer()
+
+	if err != nil {
+		errChan <- err
+		return
+	}
+
+	defer C.free(unsafe.Pointer(buffer))
+
+	_, err = C.streamOn(C.int(d.file.Fd()))
+
+	if err != nil {
+		errChan <- err
+		return
+	}
+
+	//----STREAMING------
+loop:
+	for {
+		select {
+		case <-stop:
+			break loop
+
+		default:
+			_, err = C.queueBuffer(C.int(d.file.Fd()), buffer)
+
+			if err != nil {
+				errChan <- err
+				return
+			}
+
+			_, err = C.dequeueBuffer(C.int(d.file.Fd()), buffer)
+
+			if err != nil {
+				errChan <- err
+				return
+			}
+
+			bytes := copyBytes(mappedMemoryPtr, requestedBuffer)
+			snapChan <- &snapshot{bytes}
+		}
+	}
+
+	//-------------------
+
+	_, err = C.streamOff(C.int(d.file.Fd()))
+
+	if err != nil {
+		errChan <- err
+	}
+}
+
 func setFrameSize(d *device, frameSize *DiscreteFrameSize) error {
 
 	raw := frameSize.PixelFormat.(pixelFormat)
